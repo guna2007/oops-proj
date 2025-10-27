@@ -20,8 +20,9 @@ void TaskExecutor::runTasks(const vector<Task *> &ordered_tasks, const string &s
     output << "+============================================+\033[0m" << endl;
     if (!scheduler_name.empty())
     {
-        output << "\n  [Scheduler: \033[1;33m" << scheduler_name << "\033[0m]" << endl;
-        output << "  " << string(44, '-') << endl;
+        output << "  Scheduler: \033[1;33m" << scheduler_name << "\033[0m" << endl;
+        output << "  " << string(44, '-') << endl
+               << endl;
     }
 
     int executed_count = 0;

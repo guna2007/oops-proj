@@ -69,10 +69,13 @@ void TaskManager::run()
             printSummaryReport();
             break;
         case 0:
-            cout << "Exiting HTSE. Goodbye!" << endl;
+            cout << "\n\033[1;36m";
+            cout << "+============================================================+" << endl;
+            cout << "|         Thank you for using HTSE! Goodbye!                |" << endl;
+            cout << "+============================================================+\033[0m" << endl;
             return;
         default:
-            cout << "Invalid choice! Please try again." << endl;
+            cout << "\033[1;31m[!] Invalid choice! Please try again.\033[0m" << endl;
         }
 
         cout << endl;
@@ -103,123 +106,127 @@ void TaskManager::addNewTask()
     string name;
     int priority, deadline, time;
 
-    cout << "Enter Task Name: ";
+    cout << "\n\033[1;36m--- Add New Task ---\033[0m" << endl;
+    cout << "Task Name: ";
     getline(cin, name);
 
-    cout << "Enter Priority (1-10, 10 highest): ";
+    cout << "Priority (1-10, 10=highest): ";
     while (!(cin >> priority) || priority < 1 || priority > 10)
     {
         cin.clear();
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        cout << "Invalid priority! Enter a number between 1 and 10: ";
+        cout << "\033[1;31m[!] Invalid!\033[0m Enter 1-10: ";
     }
 
-    cout << "Enter Deadline (integer days from now): ";
+    cout << "Deadline (days from now): ";
     while (!(cin >> deadline) || deadline < 0)
     {
         cin.clear();
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        cout << "Invalid deadline! Enter a positive number: ";
+        cout << "\033[1;31m[!] Invalid!\033[0m Enter positive number: ";
     }
 
-    cout << "Enter Estimated Execution Time (units): ";
+    cout << "Execution Time (units): ";
     while (!(cin >> time) || time < 1)
     {
         cin.clear();
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        cout << "Invalid time! Enter a positive number: ";
+        cout << "\033[1;31m[!] Invalid!\033[0m Enter positive number: ";
     }
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
     Task *new_task = createTask(name, priority, deadline, time);
-    cout << "\033[1;32m[+] Task created successfully!\033[0m ID: " << new_task->getId()
-         << " | Name: \"" << name << "\"" << endl;
+    cout << "\n\033[1;32m[SUCCESS] Task created!\033[0m" << endl;
+    cout << "  ID: " << new_task->getId() << " | Name: \"" << name << "\"" << endl;
+    cout << "  Priority: " << priority << " | Deadline: " << deadline << "d | Time: " << time << "u" << endl;
 }
 
 void TaskManager::addSubtaskToTask()
 {
     if (all_tasks.empty())
     {
-        cout << "No tasks available! Create tasks first." << endl;
+        cout << "\n\033[1;31m[!] No tasks available! Create tasks first.\033[0m" << endl;
         return;
     }
 
     int parent_id, subtask_id;
 
-    cout << "Enter Parent Task ID: ";
+    cout << "\n\033[1;36m--- Add Subtask Relationship ---\033[0m" << endl;
+    cout << "Parent Task ID: ";
     if (!(cin >> parent_id))
     {
         cin.clear();
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        cout << "Invalid input!" << endl;
+        cout << "\033[1;31m[!] Invalid input!\033[0m" << endl;
         return;
     }
 
-    cout << "Enter Subtask ID: ";
+    cout << "Child/Subtask ID: ";
     if (!(cin >> subtask_id))
     {
         cin.clear();
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        cout << "Invalid input!" << endl;
+        cout << "\033[1;31m[!] Invalid input!\033[0m" << endl;
         return;
     }
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
     if (!validateTaskId(parent_id) || !validateTaskId(subtask_id))
     {
-        cout << "Invalid task ID(s)!" << endl;
+        cout << "\033[1;31m[!] Invalid task ID(s)!\033[0m" << endl;
         return;
     }
 
     if (parent_id == subtask_id)
     {
-        cout << "Error: A task cannot be its own subtask!" << endl;
+        cout << "\033[1;31m[!] Error: A task cannot be its own subtask!\033[0m" << endl;
         return;
     }
 
     addSubtask(parent_id, subtask_id);
-    cout << "\033[1;32m[+] Subtask relationship created!\033[0m Parent: "
-         << parent_id << " --> Child: " << subtask_id << endl;
+    cout << "\n\033[1;32m[SUCCESS] Subtask relationship created!\033[0m" << endl;
+    cout << "  Parent Task #" << parent_id << " --> Child Task #" << subtask_id << endl;
 }
 
 void TaskManager::setTaskDependency()
 {
     if (all_tasks.empty())
     {
-        cout << "No tasks available! Create tasks first." << endl;
+        cout << "\n\033[1;31m[!] No tasks available! Create tasks first.\033[0m" << endl;
         return;
     }
 
     int task_id, dependency_id;
 
-    cout << "Enter Task ID: ";
+    cout << "\n\033[1;36m--- Set Task Dependency ---\033[0m" << endl;
+    cout << "Task ID (will depend on another): ";
     if (!(cin >> task_id))
     {
         cin.clear();
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        cout << "Invalid input!" << endl;
+        cout << "\033[1;31m[!] Invalid input!\033[0m" << endl;
         return;
     }
 
-    cout << "Enter Dependency Task ID: ";
+    cout << "Dependency Task ID (must complete first): ";
     if (!(cin >> dependency_id))
     {
         cin.clear();
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        cout << "Invalid input!" << endl;
+        cout << "\033[1;31m[!] Invalid input!\033[0m" << endl;
         return;
     }
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
     if (!validateTaskId(task_id) || !validateTaskId(dependency_id))
     {
-        cout << "Invalid task ID(s)!" << endl;
+        cout << "\033[1;31m[!] Invalid task ID(s)!\033[0m" << endl;
         return;
     }
 
     if (task_id == dependency_id)
     {
-        cout << "Error: A task cannot depend on itself!" << endl;
+        cout << "\033[1;31m[!] Error: A task cannot depend on itself!\033[0m" << endl;
         return;
     }
 
@@ -229,28 +236,30 @@ void TaskManager::setTaskDependency()
     if (hasCircularDependencies())
     {
         // Note: For simplicity, we'll just warn; in production, would rollback
-        cout << "\033[1;31m[!] WARNING: This dependency may create a cycle!\033[0m" << endl;
+        cout << "\n\033[1;33m[WARNING] This dependency may create a cycle!\033[0m" << endl;
     }
 
-    cout << "\033[1;32m[+] Dependency added!\033[0m Task " << task_id
-         << " now depends on Task " << dependency_id << endl;
+    cout << "\n\033[1;32m[SUCCESS] Dependency added!\033[0m" << endl;
+    cout << "  Task #" << task_id << " now depends on Task #" << dependency_id << endl;
 }
 
 void TaskManager::chooseSchedulingStrategy()
 {
     int choice;
 
-    cout << "\n\033[1;36m>> Select Scheduling Strategy:\033[0m" << endl;
+    cout << "\n\033[1;36m+-------------------------------------------+" << endl;
+    cout << "|      SELECT SCHEDULING STRATEGY           |" << endl;
+    cout << "+-------------------------------------------+\033[0m" << endl;
     cout << "  [1] Priority Based (highest priority first)" << endl;
     cout << "  [2] Deadline Based (earliest deadline first)" << endl;
     cout << "  [3] Hierarchical (parent tasks first)" << endl;
-    cout << "Enter your choice: ";
+    cout << "\nYour choice: ";
 
     if (!(cin >> choice))
     {
         cin.clear();
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        cout << "Invalid input!" << endl;
+        cout << "\033[1;31m[!] Invalid input!\033[0m" << endl;
         return;
     }
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
@@ -259,18 +268,18 @@ void TaskManager::chooseSchedulingStrategy()
     {
     case 1:
         setScheduler(make_unique<PriorityScheduler>());
-        cout << "\033[1;32m[+] PriorityScheduler activated!\033[0m" << endl;
+        cout << "\n\033[1;32m[SUCCESS] PriorityScheduler activated!\033[0m" << endl;
         break;
     case 2:
         setScheduler(make_unique<DeadlineScheduler>());
-        cout << "\033[1;32m[+] DeadlineScheduler activated!\033[0m" << endl;
+        cout << "\n\033[1;32m[SUCCESS] DeadlineScheduler activated!\033[0m" << endl;
         break;
     case 3:
         setScheduler(make_unique<HierarchicalScheduler>());
-        cout << "\033[1;32m[+] HierarchicalScheduler activated!\033[0m" << endl;
+        cout << "\n\033[1;32m[SUCCESS] HierarchicalScheduler activated!\033[0m" << endl;
         break;
     default:
-        cout << "\033[1;31m[!] Invalid choice! Keeping current scheduler.\033[0m" << endl;
+        cout << "\n\033[1;31m[!] Invalid choice! Keeping current scheduler.\033[0m" << endl;
     }
 }
 
@@ -315,21 +324,25 @@ void TaskManager::executeAllTasks()
 {
     if (all_tasks.empty())
     {
-        cout << "No tasks to execute!" << endl;
+        cout << "\n\033[1;31m[!] No tasks to execute!\033[0m" << endl;
         return;
     }
 
     if (!current_scheduler)
     {
-        cout << "No scheduler selected! Using default PriorityScheduler." << endl;
+        cout << "\n\033[1;33m[INFO] No scheduler selected. Using default PriorityScheduler.\033[0m" << endl;
         current_scheduler = make_unique<PriorityScheduler>();
     }
 
     // Check for circular dependencies before execution
     if (hasCircularDependencies())
     {
-        cout << "ERROR: Circular dependencies detected! Cannot execute." << endl;
-        cout << "Please review and fix task dependencies." << endl;
+        cout << "\n\033[1;31m";
+        cout << "+============================================+" << endl;
+        cout << "|               ERROR DETECTED               |" << endl;
+        cout << "+============================================+\033[0m" << endl;
+        cout << "  Circular dependencies found!" << endl;
+        cout << "  Please review and fix task dependencies." << endl;
         return;
     }
 
