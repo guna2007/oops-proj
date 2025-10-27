@@ -9,6 +9,8 @@
 #include "scheduler.h"
 #include "task_executor.h"
 
+using namespace std;
+
 // OOP Concept: Encapsulation - TaskManager encapsulates all task management logic
 // OOP Concept: Composition - Contains collections of Task objects and a Scheduler
 
@@ -16,11 +18,11 @@ class TaskManager
 {
 private:
     // OOP Concept: Composition - TaskManager owns and manages Task objects
-    std::vector<std::unique_ptr<Task>> all_tasks; // Owns tasks (smart pointers)
-    std::map<int, Task *> task_map;               // Quick lookup by ID
+    vector<unique_ptr<Task>> all_tasks; // Owns tasks (smart pointers)
+    map<int, Task *> task_map;          // Quick lookup by ID
 
     // OOP Concept: Polymorphism - Can hold any Scheduler subclass
-    std::unique_ptr<Scheduler> current_scheduler;
+    unique_ptr<Scheduler> current_scheduler;
 
     TaskExecutor executor;
     int next_task_id;
@@ -28,7 +30,7 @@ private:
     // Execution statistics
     int completed_tasks;
     int total_simulated_time;
-    std::string last_scheduler_name;
+    string last_scheduler_name;
 
     // Helper methods
     void displayMenu() const;
@@ -43,7 +45,7 @@ private:
     // Validation helpers
     Task *findTaskById(int id) const;
     bool validateTaskId(int id) const;
-    bool detectCycle(Task *start, std::set<int> &visited, std::set<int> &rec_stack) const;
+    bool detectCycle(Task *start, set<int> &visited, set<int> &rec_stack) const;
     bool hasCircularDependencies() const;
 
 public:
@@ -55,13 +57,13 @@ public:
     void run();
 
     // Task creation and management
-    Task *createTask(const std::string &name, int priority, int deadline, int time);
+    Task *createTask(const string &name, int priority, int deadline, int time);
     void addSubtask(int parent_id, int subtask_id);
     void addDependency(int task_id, int dependency_id);
 
     // Scheduler management
     // OOP Concept: Polymorphism - Accepts any Scheduler subclass
-    void setScheduler(std::unique_ptr<Scheduler> sched);
+    void setScheduler(unique_ptr<Scheduler> sched);
 
     // Execution
     void executeAll();

@@ -2,30 +2,32 @@
 #include <iostream>
 #include <iomanip>
 
+using namespace std;
+
 // OOP Concept: Composition - TaskExecutor coordinates execution of Task objects
 
-TaskExecutor::TaskExecutor(std::ostream &out)
+TaskExecutor::TaskExecutor(ostream &out)
     : output(out), total_execution_time(0)
 {
 }
 
 // OOP Concept: Abstraction - Complex execution logic abstracted into single method
-void TaskExecutor::runTasks(const std::vector<Task *> &ordered_tasks)
+void TaskExecutor::runTasks(const vector<Task *> &ordered_tasks)
 {
-    output << "========================================" << std::endl;
-    output << "STARTING TASK EXECUTION" << std::endl;
-    output << "========================================" << std::endl;
+    output << "========================================" << endl;
+    output << "STARTING TASK EXECUTION" << endl;
+    output << "========================================" << endl;
 
     int executed_count = 0;
     int not_ready_count = 0;
     const int MAX_PASSES = 10; // Prevent infinite loops
 
     // Create a working list of tasks to execute
-    std::vector<Task *> remaining_tasks = ordered_tasks;
+    vector<Task *> remaining_tasks = ordered_tasks;
 
     for (int pass = 0; pass < MAX_PASSES && !remaining_tasks.empty(); ++pass)
     {
-        std::vector<Task *> deferred_tasks;
+        vector<Task *> deferred_tasks;
         bool progress_made = false;
 
         for (Task *task : remaining_tasks)
@@ -55,29 +57,29 @@ void TaskExecutor::runTasks(const std::vector<Task *> &ordered_tasks)
         // If no progress was made, we're stuck
         if (!progress_made && !remaining_tasks.empty())
         {
-            output << "----------------------------------------" << std::endl;
-            output << "WARNING: Cannot make further progress!" << std::endl;
-            output << "The following tasks are NOT READY:" << std::endl;
+            output << "----------------------------------------" << endl;
+            output << "WARNING: Cannot make further progress!" << endl;
+            output << "The following tasks are NOT READY:" << endl;
             for (Task *task : remaining_tasks)
             {
                 output << "  Task " << task->getId() << ": " << task->getName()
-                       << " (waiting on dependencies)" << std::endl;
+                       << " (waiting on dependencies)" << endl;
                 not_ready_count++;
             }
             break;
         }
     }
 
-    output << "========================================" << std::endl;
+    output << "========================================" << endl;
     if (not_ready_count == 0)
     {
-        output << "ALL TASKS COMPLETED SUCCESSFULLY" << std::endl;
+        output << "ALL TASKS COMPLETED SUCCESSFULLY" << endl;
     }
     else
     {
-        output << "EXECUTION COMPLETED WITH " << not_ready_count << " TASK(S) NOT READY" << std::endl;
+        output << "EXECUTION COMPLETED WITH " << not_ready_count << " TASK(S) NOT READY" << endl;
     }
-    output << "========================================" << std::endl;
+    output << "========================================" << endl;
 }
 
 // OOP Concept: Recursion - Executes task and all its subtasks recursively
@@ -108,13 +110,13 @@ void TaskExecutor::executeTaskWithSubtasks(Task *task, int indent)
     printTaskExecution(task, indent, "COMPLETED");
 }
 
-void TaskExecutor::printTaskExecution(Task *task, int indent, const std::string &action)
+void TaskExecutor::printTaskExecution(Task *task, int indent, const string &action)
 {
-    std::string indentation(indent * 2, ' ');
+    string indentation(indent * 2, ' ');
     output << indentation << action << ": Task " << task->getId()
            << " : " << task->getName()
            << " (priority=" << task->getPriority()
-           << ", deadline=" << task->getDeadline() << ")" << std::endl;
+           << ", deadline=" << task->getDeadline() << ")" << endl;
 }
 
 int TaskExecutor::getTotalExecutionTime() const

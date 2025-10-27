@@ -1,6 +1,8 @@
 #include "task_manager.h"
 #include <iostream>
 
+using namespace std;
+
 // OOP Concept: Abstraction - Main function uses high-level TaskManager interface
 // All complexity is hidden behind the TaskManager class
 

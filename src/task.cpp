@@ -2,9 +2,11 @@
 #include <iostream>
 #include <iomanip>
 
+using namespace std;
+
 // OOP Concept: Encapsulation - Implementation details hidden from users
 
-Task::Task(int id, const std::string &name, int priority, int deadline, int time)
+Task::Task(int id, const string &name, int priority, int deadline, int time)
     : id(id), name(name), priority(priority), deadline(deadline),
       status(PENDING), estimated_time(time)
 {
@@ -22,7 +24,7 @@ int Task::getId() const
     return id;
 }
 
-std::string Task::getName() const
+string Task::getName() const
 {
     return name;
 }
@@ -47,12 +49,12 @@ int Task::getEstimatedTime() const
     return estimated_time;
 }
 
-const std::vector<Task *> &Task::getSubtasks() const
+const vector<Task *> &Task::getSubtasks() const
 {
     return subtasks;
 }
 
-const std::vector<Task *> &Task::getDependencies() const
+const vector<Task *> &Task::getDependencies() const
 {
     return dependencies;
 }
@@ -106,8 +108,8 @@ void Task::markComplete()
 // OOP Concept: Abstraction - Display logic abstracted into method
 void Task::displayInfo(int indent) const
 {
-    std::string indentation(indent * 2, ' ');
-    std::string statusStr;
+    string indentation(indent * 2, ' ');
+    string statusStr;
 
     switch (status)
     {
@@ -122,11 +124,11 @@ void Task::displayInfo(int indent) const
         break;
     }
 
-    std::cout << indentation << "Task " << id << ": " << name
-              << " (priority=" << priority
-              << ", deadline=" << deadline
-              << ", status=" << statusStr
-              << ", time=" << estimated_time << ")" << std::endl;
+    cout << indentation << "Task " << id << ": " << name
+         << " (priority=" << priority
+         << ", deadline=" << deadline
+         << ", status=" << statusStr
+         << ", time=" << estimated_time << ")" << endl;
 }
 
 // OOP Concept: Recursion - Displaying hierarchical structure recursively

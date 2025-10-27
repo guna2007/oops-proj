@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+using namespace std;
+
 // OOP Concept: Encapsulation - Task encapsulates all task-related data and behavior
 // OOP Concept: Composition - Task contains vectors of other Task pointers (subtasks and dependencies)
 
@@ -19,30 +21,30 @@ class Task
 private:
     // OOP Concept: Encapsulation - Private data members
     int id;
-    std::string name;
+    string name;
     int priority; // 1-10, 10 is highest
     int deadline; // Integer days from now
     TaskStatus status;
-    int estimated_time;               // Simulated execution time units
-    std::vector<Task *> subtasks;     // OOP Concept: Composition - Contains other tasks
-    std::vector<Task *> dependencies; // OOP Concept: Aggregation - References to other tasks
+    int estimated_time;          // Simulated execution time units
+    vector<Task *> subtasks;     // OOP Concept: Composition - Contains other tasks
+    vector<Task *> dependencies; // OOP Concept: Aggregation - References to other tasks
 
 public:
     // Constructor
-    Task(int id, const std::string &name, int priority, int deadline, int time);
+    Task(int id, const string &name, int priority, int deadline, int time);
 
     // Destructor
     ~Task();
 
     // Getters - OOP Concept: Encapsulation (controlled access)
     int getId() const;
-    std::string getName() const;
+    string getName() const;
     int getPriority() const;
     int getDeadline() const;
     TaskStatus getStatus() const;
     int getEstimatedTime() const;
-    const std::vector<Task *> &getSubtasks() const;
-    const std::vector<Task *> &getDependencies() const;
+    const vector<Task *> &getSubtasks() const;
+    const vector<Task *> &getDependencies() const;
 
     // Task hierarchy management
     void addSubtask(Task *t);

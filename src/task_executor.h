@@ -6,25 +6,27 @@
 #include <iostream>
 #include "task.h"
 
+using namespace std;
+
 // OOP Concept: Composition - TaskExecutor uses Task objects to perform operations
 // OOP Concept: Abstraction - Execution details hidden from caller
 
 class TaskExecutor
 {
 private:
-    std::ostream &output; // OOP Concept: Composition - Contains reference to output stream
+    ostream &output; // OOP Concept: Composition - Contains reference to output stream
     int total_execution_time;
 
     // Helper methods
     void executeTaskWithSubtasks(Task *task, int indent = 0);
-    void printTaskExecution(Task *task, int indent, const std::string &action);
+    void printTaskExecution(Task *task, int indent, const string &action);
 
 public:
-    // Constructor takes output stream (default is std::cout)
-    explicit TaskExecutor(std::ostream &out = std::cout);
+    // Constructor takes output stream (default is cout)
+    explicit TaskExecutor(ostream &out = cout);
 
     // OOP Concept: Abstraction - High-level execution interface
-    void runTasks(const std::vector<Task *> &ordered_tasks);
+    void runTasks(const vector<Task *> &ordered_tasks);
 
     // Get total simulated execution time
     int getTotalExecutionTime() const;
