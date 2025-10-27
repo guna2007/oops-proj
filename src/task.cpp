@@ -1,6 +1,7 @@
 #include "task.h"
 #include <iostream>
 #include <iomanip>
+#include <windows.h>
 
 using namespace std;
 
@@ -95,8 +96,8 @@ bool Task::isReady() const
 void Task::execute()
 {
     status = RUNNING;
-    // Simulate work (in real scenario, could use sleep)
-    // For this educational project, we just change status
+    // Simulate realistic work with 500ms delay
+    Sleep(5000); // Windows API sleep function (milliseconds)
     status = COMPLETED;
 }
 

@@ -12,11 +12,16 @@ TaskExecutor::TaskExecutor(ostream &out)
 }
 
 // OOP Concept: Abstraction - Complex execution logic abstracted into single method
-void TaskExecutor::runTasks(const vector<Task *> &ordered_tasks)
+void TaskExecutor::runTasks(const vector<Task *> &ordered_tasks, const string &scheduler_name)
 {
     output << "========================================" << endl;
     output << "STARTING TASK EXECUTION" << endl;
     output << "========================================" << endl;
+    if (!scheduler_name.empty())
+    {
+        output << "[Scheduler Used: " << scheduler_name << "]" << endl;
+        output << "----------------------------------------" << endl;
+    }
 
     int executed_count = 0;
     int not_ready_count = 0;
@@ -117,6 +122,7 @@ void TaskExecutor::printTaskExecution(Task *task, int indent, const string &acti
            << " : " << task->getName()
            << " (priority=" << task->getPriority()
            << ", deadline=" << task->getDeadline() << ")" << endl;
+    output.flush(); // Force output immediately
 }
 
 int TaskExecutor::getTotalExecutionTime() const

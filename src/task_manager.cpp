@@ -78,7 +78,7 @@ void TaskManager::run()
 void TaskManager::displayMenu() const
 {
     cout << "========================================" << endl;
-    cout << "MAIN MENU" << endl;
+    cout << "MAIN MENU - HIERARCHICAL TASK SCHEDULING ENGINE" << endl;
     cout << "========================================" << endl;
     cout << "1. Add New Task" << endl;
     cout << "2. Add Subtask to Existing Task" << endl;
@@ -330,9 +330,19 @@ void TaskManager::printSummaryReport() const
     cout << "EXECUTION REPORT" << endl;
     cout << "========================================" << endl;
 
-    int total_tasks = all_tasks.size();
+    int total_root_tasks = 0;
     int total_subtasks = 0;
     int completed = 0;
+
+    // Find root tasks (not subtasks of any other task)
+    set<int> subtask_ids;
+    for (const auto &task_ptr : all_tasks)
+    {
+        for (const Task *subtask : task_ptr->getSubtasks())
+        {
+            subtask_ids.insert(subtask->getId());
+        }
+    }
 
     for (const auto &task_ptr : all_tasks)
     {
@@ -341,11 +351,19 @@ void TaskManager::printSummaryReport() const
         {
             completed++;
         }
+        // Count root tasks
+        if (subtask_ids.find(task_ptr->getId()) == subtask_ids.end())
+        {
+            total_root_tasks++;
+        }
     }
 
-    cout << "Total Tasks: " << total_tasks << endl;
-    cout << "Total Subtasks: " << total_subtasks << endl;
-    cout << "Completed: " << completed << " / " << total_tasks << endl;
+    int overall_tasks = all_tasks.size();
+
+    cout << "Total Root Tasks: " << total_root_tasks << endl;
+    cout << "Total Subtasks (nested): " << total_subtasks << endl;
+    cout << "Overall Tasks Executed: " << overall_tasks << endl;
+    cout << "Completed Successfully: " << completed << " / " << overall_tasks << endl;
     cout << "Scheduler Used: " << last_scheduler_name << endl;
     cout << "Simulated Execution Time: " << total_simulated_time << " units" << endl;
     cout << "========================================" << endl;
@@ -414,8 +432,8 @@ void TaskManager::executeAll()
     // Reset executor
     executor.resetExecutionTime();
 
-    // Execute tasks
-    executor.runTasks(scheduled_tasks);
+    // Execute tasks with scheduler name displayed
+    executor.runTasks(scheduled_tasks, last_scheduler_name);
 
     // Update statistics
     total_simulated_time = executor.getTotalExecutionTime();

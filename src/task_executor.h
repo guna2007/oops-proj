@@ -26,7 +26,7 @@ public:
     explicit TaskExecutor(ostream &out = cout);
 
     // OOP Concept: Abstraction - High-level execution interface
-    void runTasks(const vector<Task *> &ordered_tasks);
+    void runTasks(const vector<Task *> &ordered_tasks, const string &scheduler_name = "");
 
     // Get total simulated execution time
     int getTotalExecutionTime() const;
