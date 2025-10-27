@@ -1,154 +1,81 @@
-# Hierarchical Task Scheduling Engine (HTSE)# Hierarchical Task Scheduling Engine (HTSE)
-
-### Object-Oriented Programming Semester Project
+# Hierarchical Task Scheduling Engine (HTSE)
 
 ## Object-Oriented Programming Semester Project
 
 ---
 
----
-
-## Quick Start
-
 ## 1. Project Title and Objective
 
-```bash
-
-# Compile### Title
-
-make
+### Title
 
 **Hierarchical Task Scheduling Engine (HTSE)**
 
-# Run
-
-./htse### Objective
-
-```
+### Objective
 
 To design and implement a task scheduling and management system in C++ that demonstrates comprehensive understanding of Object-Oriented Programming (OOP) principles including:
 
+- Encapsulation
+- Inheritance
+- Polymorphism
+- Abstraction
+- Composition
+- Recursion
+
+The system simulates real-world task scheduling scenarios with support for hierarchical task structures, dependency management, and multiple scheduling algorithms.
+
 ---
 
-- Encapsulation
+## 2. System Specifications
 
-## 📚 Documentation- Inheritance
+### Hardware Requirements
 
-- Polymorphism
+- **Processor**: Any modern x86/x64 processor
+- **RAM**: Minimum 512 MB
+- **Storage**: 10 MB free space
 
-All project documentation is located in the **`docs/`** folder:- Abstraction
+### Software Requirements
 
-- Composition
-
-### Main Documentation- Recursion
-
-- **[PROJECT_README.md](docs/PROJECT_README.md)** - Complete project documentation (start here!)
-
-  - Project title and objectivesThe system simulates real-world task scheduling scenarios with support for hierarchical task structures, dependency management, and multiple scheduling algorithms.
-
-  - System specifications
-
-  - All OOP concepts explained---
-
-  - Design and working details
-
-  - Usage instructions## 2. System Specifications
-
-### Technical Documentation### Hardware Requirements
-
-- **[FEATURES.md](docs/FEATURES.md)** - Complete technical handbook
-
-- **[CLASS_DIAGRAM.md](docs/CLASS_DIAGRAM.md)** - UML class diagrams- **Processor**: Any modern x86/x64 processor
-
-- **[FLOWCHART.md](docs/FLOWCHART.md)** - Program execution flowcharts- **RAM**: Minimum 512 MB
-
-- **[SCREENSHOTS_GUIDE.md](docs/SCREENSHOTS_GUIDE.md)** - Screenshot capture instructions- **Storage**: 10 MB free space
-
----### Software Requirements
-
-## Project Structure- **Operating System**: Windows 10/11, Linux, or macOS
-
+- **Operating System**: Windows 10/11, Linux, or macOS
 - **Compiler**: g++ (GCC 6.3.0 or higher) with C++17 support
+- **Build Tools**: Make (optional)
+- **Terminal**: Any terminal supporting ANSI escape codes for colored output
 
-````- **Build Tools**: Make (optional)
+### Development Environment
 
-OOPs-Proj/- **Terminal**: Any terminal supporting ANSI escape codes for colored output
+- **Language**: C++ (Standard: C++17)
+- **Paradigm**: Object-Oriented Programming
+- **Build System**: Makefile / Manual compilation
+- **Libraries**: C++ Standard Library only (no external dependencies)
 
-├── README.md                    # This file
+---
 
-├── src/                         # Source code (14 files)### Development Environment
+## 3. Incorporated OOP Concepts
 
-├── docs/                        # All documentation
+### 3.1 Encapsulation
 
-│   ├── PROJECT_README.md        # Main documentation- **Language**: C++ (Standard: C++17)
+**Definition**: Bundling data and methods within a class while restricting direct access to internal state.
 
-│   ├── FEATURES.md              # Technical details- **Paradigm**: Object-Oriented Programming
+**Implementation**:
 
-│   ├── CLASS_DIAGRAM.md         # UML diagrams- **Build System**: Makefile / Manual compilation
+- **Task Class**: All attributes (id, name, priority, deadline, status) are private with public getter/setter methods
+- **TaskManager Class**: Internal data structures (task lists, maps) are private, exposed only through controlled methods
+- **TaskExecutor Class**: Execution logic encapsulated within the class
 
-│   ├── FLOWCHART.md             # Flowcharts- **Libraries**: C++ Standard Library only (no external dependencies)
+**Files**: `task.h`, `task.cpp`, `task_manager.h`, `task_manager.cpp`
 
-│   └── SCREENSHOTS_GUIDE.md     # Screenshot guide
+### 3.2 Inheritance
 
-├── Makefile                     # Build configuration---
+**Definition**: Creating new classes (derived) from existing classes (base) to promote code reuse.
 
-└── cmds.txt                     # Build commands
+**Implementation**:
 
-```## 3. Incorporated OOP Concepts
-
-
-
----### 3.1 Encapsulation
-
-
-
-## Features**Definition**: Bundling data and methods within a class while restricting direct access to internal state.
-
-
-
-✅ Task creation with priority, deadline, and execution time  **Implementation**:
-
-✅ Hierarchical task structures (parent-child relationships)
-
-✅ Task dependencies management  - **Task Class**: All attributes (id, name, priority, deadline, status) are private with public getter/setter methods
-
-✅ Multiple scheduling algorithms (Priority, Deadline, Hierarchical)  - **TaskManager Class**: Internal data structures (task lists, maps) are private, exposed only through controlled methods
-
-✅ Circular dependency detection  - **TaskExecutor Class**: Execution logic encapsulated within the class
-
-✅ Progress visualization with animated bars
-
-✅ Color-coded CLI interface  **Files**: `task.h`, `task.cpp`, `task_manager.h`, `task_manager.cpp`
-
-
-
----### 3.2 Inheritance
-
-
-
-## OOP Concepts Demonstrated**Definition**: Creating new classes (derived) from existing classes (base) to promote code reuse.
-
-
-
-- **Encapsulation** - Private data with controlled access**Implementation**:
-
-- **Inheritance** - Scheduler class hierarchy
-
-- **Polymorphism** - Virtual functions and runtime binding- **Base Class**: `Scheduler` (abstract)
-
-- **Abstraction** - Abstract base classes- **Derived Classes**:
-
-- **Composition** - Task containment relationships  - `PriorityScheduler` - Inherits from Scheduler
-
-- **Recursion** - Hierarchical operations  - `DeadlineScheduler` - Inherits from Scheduler
-
+- **Base Class**: `Scheduler` (abstract)
+- **Derived Classes**:
+  - `PriorityScheduler` - Inherits from Scheduler
+  - `DeadlineScheduler` - Inherits from Scheduler
   - `HierarchicalScheduler` - Inherits from Scheduler
 
----
-
 **Files**: `scheduler.h`, `priority_scheduler.h/.cpp`, `deadline_scheduler.h/.cpp`, `hierarchical_scheduler.h/.cpp`
-
-**For complete details, see [docs/PROJECT_README.md](docs/PROJECT_README.md)**
 
 ### 3.3 Polymorphism
 
@@ -206,28 +133,26 @@ OOPs-Proj/- **Terminal**: Any terminal supporting ANSI escape codes for colored 
 
 ### 4.1 System Architecture
 
-````
-
+```
 ┌─────────────────────────────────────────────┐
-│ User Interface │
-│ (Interactive CLI Menu) │
+│              User Interface                  │
+│           (Interactive CLI Menu)             │
 └──────────────────┬──────────────────────────┘
-│
-▼
+                   │
+                   ▼
 ┌─────────────────────────────────────────────┐
-│ TaskManager │
-│ • Central coordinator │
-│ • Manages all tasks │
-│ • Handles user input │
-│ • Controls execution flow │
+│            TaskManager                       │
+│  • Central coordinator                       │
+│  • Manages all tasks                         │
+│  • Handles user input                        │
+│  • Controls execution flow                   │
 └────┬──────────┬──────────┬──────────────────┘
-│ │ │
-▼ ▼ ▼
+     │          │          │
+     ▼          ▼          ▼
 ┌────────┐ ┌─────────┐ ┌──────────────┐
-│ Task │ │Scheduler│ │TaskExecutor │
-│Objects │ │Strategy │ │ │
+│  Task  │ │Scheduler│ │TaskExecutor  │
+│Objects │ │Strategy │ │              │
 └────────┘ └─────────┘ └──────────────┘
-
 ```
 
 ### 4.2 Class Structure
@@ -279,33 +204,25 @@ OOPs-Proj/- **Terminal**: Any terminal supporting ANSI escape codes for colored 
 **1. Task Creation**:
 
 ```
-
 User Input → Validation → Create Task Object → Store in Manager
-
 ```
 
 **2. Relationship Building**:
 
 ```
-
 Select Parent → Select Child → Create Link → Update Structure
-
 ```
 
 **3. Scheduling**:
 
 ```
-
 Collect All Tasks → Apply Selected Algorithm → Return Ordered List
-
 ```
 
 **4. Execution**:
 
 ```
-
 Check Dependencies → Execute Ready Tasks → Mark Complete → Repeat
-
 ```
 
 ### 4.5 Dependency Resolution
@@ -329,28 +246,26 @@ Uses Depth-First Search (DFS) algorithm with recursion stack:
 ## 5. Project Structure
 
 ```
-
 OOPs-Proj/
-├── src/ # Source code files
-│ ├── task.h / task.cpp # Task entity class
-│ ├── scheduler.h # Abstract scheduler base
-│ ├── priority_scheduler.h / .cpp # Priority algorithm
-│ ├── deadline_scheduler.h / .cpp # Deadline algorithm
-│ ├── hierarchical_scheduler.h / .cpp # Hierarchical algorithm
-│ ├── task_executor.h / .cpp # Execution engine
-│ ├── task_manager.h / .cpp # Main coordinator
-│ └── main.cpp # Entry point
+├── src/                                    # Source code files
+│   ├── task.h / task.cpp                   # Task entity class
+│   ├── scheduler.h                         # Abstract scheduler base
+│   ├── priority_scheduler.h / .cpp         # Priority algorithm
+│   ├── deadline_scheduler.h / .cpp         # Deadline algorithm
+│   ├── hierarchical_scheduler.h / .cpp     # Hierarchical algorithm
+│   ├── task_executor.h / .cpp              # Execution engine
+│   ├── task_manager.h / .cpp               # Main coordinator
+│   └── main.cpp                            # Entry point
 │
-├── docs/ # Documentation
-│ ├── FEATURES.md # Technical handbook
-│ ├── CLASS_DIAGRAM.md # UML class diagrams
-│ └── FLOWCHART.md # Execution flowcharts
+├── docs/                                   # Documentation
+│   ├── FEATURES.md                         # Technical handbook
+│   ├── CLASS_DIAGRAM.md                    # UML class diagrams
+│   └── FLOWCHART.md                        # Execution flowcharts
 │
-├── README.md # This file
-├── Makefile # Build configuration
-└── cmds.txt # Build & test commands
-
-````
+├── README.md                               # This file
+├── Makefile                                # Build configuration
+└── cmds.txt                                # Build & test commands
+```
 
 ---
 
@@ -367,7 +282,7 @@ make run
 
 # Clean build files
 make clean
-````
+```
 
 ### Method 2: Manual Compilation
 

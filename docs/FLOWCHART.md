@@ -1,11 +1,445 @@
-# HTSE Execution Flowchart (Text-Based)
+# Program Execution Flowchart - HTSE
 
-## Main Program Flow
+## 1. Main Program Flow
 
 ```
-┌─────────────────┐
-│  START: main()  │
-└────────┬────────┘
+           ┌─────────┐
+           │  START  │
+           └────┬────┘
+                │
+                ▼
+        ┌───────────────┐
+        │ Create        │
+        │ TaskManager   │
+        └───────┬───────┘
+                │
+                ▼
+        ┌───────────────┐
+        │ Display Menu  │
+        └───────┬───────┘
+                │
+                ▼
+        ┌───────────────┐
+        │ Get User      │
+        │ Choice        │
+        └───────┬───────┘
+                │
+       ┌────────┴────────┐
+       │                 │
+       ▼                 ▼
+   Choice = 0?       Process
+      YES             Choice
+       │                 │
+       ▼                 │
+    ┌──────┐            │
+    │ EXIT │            │
+    └──────┘            │
+                        │
+                        └──────┐
+                               │
+                    (Loop back to Display Menu)
+```
+
+---
+
+## 2. Add Task Flow (Option 1)
+
+```
+    ┌──────────────┐
+    │ Add New Task │
+    └──────┬───────┘
+           │
+           ▼
+    ┌──────────────┐
+    │ Input Name   │
+    └──────┬───────┘
+           │
+           ▼
+    ┌──────────────┐
+    │ Input        │
+    │ Priority     │
+    │ (1-10)       │
+    └──────┬───────┘
+           │
+           ▼
+    ┌──────────────┐
+    │ Input        │
+    │ Deadline     │
+    └──────┬───────┘
+           │
+           ▼
+    ┌──────────────┐
+    │ Input Time   │
+    └──────┬───────┘
+           │
+           ▼
+    ┌──────────────┐
+    │ Create Task  │
+    │ Object       │
+    └──────┬───────┘
+           │
+           ▼
+    ┌──────────────┐
+    │ Store in     │
+    │ TaskManager  │
+    └──────┬───────┘
+           │
+           ▼
+    ┌──────────────┐
+    │ Display      │
+    │ Success      │
+    └──────────────┘
+```
+
+---
+
+## 3. Task Execution Flow (Option 6)
+
+```
+    ┌──────────────────┐
+    │ Execute All      │
+    └────────┬─────────┘
+             │
+             ▼
+    ┌──────────────────┐      NO
+    │ Tasks Exist?     │──────────▶ Display Error
+    └────────┬─────────┘
+             │ YES
+             ▼
+    ┌──────────────────┐      YES
+    │ Has Circular     │──────────▶ Display Error
+    │ Dependencies?    │           & Abort
+    └────────┬─────────┘
+             │ NO
+             ▼
+    ┌──────────────────┐
+    │ Get All Tasks    │
+    └────────┬─────────┘
+             │
+             ▼
+    ┌──────────────────┐
+    │ Apply Selected   │ ◀── Polymorphic Call
+    │ Scheduler        │
+    └────────┬─────────┘
+             │
+             ▼
+    ┌──────────────────┐
+    │ Get Ordered      │
+    │ Task List        │
+    └────────┬─────────┘
+             │
+             ▼
+    ┌──────────────────┐
+    │ Execute Tasks    │
+    │ (Multi-pass)     │
+    └────────┬─────────┘
+             │
+             ▼
+    ┌──────────────────┐
+    │ Update           │
+    │ Statistics       │
+    └────────┬─────────┘
+             │
+             ▼
+    ┌──────────────────┐
+    │ Display          │
+    │ Completion       │
+    └──────────────────┘
+```
+
+---
+
+## 4. Multi-Pass Execution Algorithm
+
+```
+    ┌──────────────────┐
+    │ Start Execution  │
+    │ pass = 0         │
+    └────────┬─────────┘
+             │
+         ┌───▼───────────────┐
+         │ For each task:    │◀──────┐
+         └────────┬──────────┘       │
+                  │                  │
+                  ▼                  │
+         ┌──────────────────┐        │
+         │ Check:           │        │
+         │ Dependencies     │        │
+         │ Satisfied?       │        │
+         └────┬────────┬────┘        │
+              │        │             │
+             YES       NO            │
+              │        │             │
+              ▼        ▼             │
+       ┌──────────┐ ┌───────┐       │
+       │ Execute  │ │ Defer │       │
+       │ Task     │ │ Task  │       │
+       └────┬─────┘ └───┬───┘       │
+            │           │            │
+            └─────┬─────┘            │
+                  │                  │
+                  ▼                  │
+         ┌──────────────────┐        │
+         │ More Deferred    │        │
+         │ Tasks?           │        │
+         └────┬────────┬────┘        │
+              │        │             │
+             YES       NO            │
+              │        │             │
+              │        ▼             │
+              │   ┌────────┐        │
+              │   │ DONE   │        │
+              │   └────────┘        │
+              │                     │
+              └─────────────────────┘
+                  (Next Pass)
+```
+
+---
+
+## 5. Dependency Check (isReady)
+
+```
+    ┌──────────────────┐
+    │ Task.isReady()   │
+    └────────┬─────────┘
+             │
+             ▼
+    ┌──────────────────┐
+    │ For each         │
+    │ dependency:      │
+    └────────┬─────────┘
+             │
+             ▼
+    ┌──────────────────┐        NO
+    │ Dependency       │──────────▶ Return FALSE
+    │ COMPLETED?       │
+    └────────┬─────────┘
+             │ YES
+             ▼
+    ┌──────────────────┐
+    │ Check next       │
+    │ dependency       │
+    └────────┬─────────┘
+             │
+             ▼
+    ┌──────────────────┐
+    │ All checked?     │
+    └────────┬─────────┘
+             │ YES
+             ▼
+    ┌──────────────────┐
+    │ Return TRUE      │
+    └──────────────────┘
+```
+
+---
+
+## 6. Scheduler Algorithms (Polymorphic)
+
+### Priority Scheduler
+
+```
+    ┌──────────────────┐
+    │ schedule(tasks)  │
+    └────────┬─────────┘
+             │
+             ▼
+    ┌──────────────────┐
+    │ Sort tasks by    │
+    │ Priority         │
+    │ (High → Low)     │
+    └────────┬─────────┘
+             │
+             ▼
+    ┌──────────────────┐
+    │ Return sorted    │
+    │ list             │
+    └──────────────────┘
+```
+
+### Deadline Scheduler
+
+```
+    ┌──────────────────┐
+    │ schedule(tasks)  │
+    └────────┬─────────┘
+             │
+             ▼
+    ┌──────────────────┐
+    │ Sort tasks by    │
+    │ Deadline         │
+    │ (Early → Late)   │
+    └────────┬─────────┘
+             │
+             ▼
+    ┌──────────────────┐
+    │ Return sorted    │
+    │ list             │
+    └──────────────────┘
+```
+
+### Hierarchical Scheduler
+
+```
+    ┌──────────────────┐
+    │ schedule(tasks)  │
+    └────────┬─────────┘
+             │
+             ▼
+    ┌──────────────────┐
+    │ Find root tasks  │
+    │ (no parents)     │
+    └────────┬─────────┘
+             │
+             ▼
+    ┌──────────────────┐
+    │ For each root:   │
+    │ Collect tree     │ ◀── Recursive
+    │ (parent first)   │
+    └────────┬─────────┘
+             │
+             ▼
+    ┌──────────────────┐
+    │ Return ordered   │
+    │ list             │
+    └──────────────────┘
+```
+
+---
+
+## 7. Circular Dependency Detection
+
+```
+    ┌──────────────────────┐
+    │ detectCycle(task)    │
+    └──────────┬───────────┘
+               │
+               ▼
+    ┌──────────────────────┐     YES
+    │ Already in           │──────────▶ CYCLE FOUND!
+    │ recursion stack?     │           Return TRUE
+    └──────────┬───────────┘
+               │ NO
+               ▼
+    ┌──────────────────────┐     YES
+    │ Already visited?     │──────────▶ Return FALSE
+    └──────────┬───────────┘
+               │ NO
+               ▼
+    ┌──────────────────────┐
+    │ Add to visited       │
+    │ Add to rec_stack     │
+    └──────────┬───────────┘
+               │
+               ▼
+    ┌──────────────────────┐
+    │ For each dependency: │
+    │ detectCycle(dep)     │ ◀── Recursive
+    └──────────┬───────────┘
+               │
+          ┌────┴────┐
+          │         │
+      Cycle      No Cycle
+       Found        │
+          │         ▼
+          │    ┌──────────────┐
+          │    │ Remove from  │
+          │    │ rec_stack    │
+          │    └──────┬───────┘
+          │           │
+          │           ▼
+          │    ┌──────────────┐
+          │    │Return FALSE  │
+          │    └──────────────┘
+          │
+          ▼
+    ┌──────────────┐
+    │ Return TRUE  │
+    └──────────────┘
+```
+
+---
+
+## 8. Complete User Session Example
+
+```
+START
+  │
+  ▼
+Create Manager
+  │
+  ▼
+┌─────────────┐
+│Display Menu │◀─────────┐
+└──────┬──────┘          │
+       │                 │
+       ▼                 │
+ Choice: 1 (Add Task)    │
+       │                 │
+       ▼                 │
+ Enter: "Design"         │
+ Priority: 8             │
+ Deadline: 10            │
+ Time: 5                 │
+       │                 │
+       ▼                 │
+ Task Created (ID=1)     │
+       │                 │
+       ├─────────────────┘
+       ▼
+ Choice: 1 (Add Task)
+       │
+       ▼
+ Enter: "Code"
+ Priority: 9
+ Deadline: 5
+ Time: 4
+       │
+       ▼
+ Task Created (ID=2)
+       │
+       ▼
+ Choice: 3 (Set Dependency)
+       │
+       ▼
+ Task 2 depends on Task 1
+       │
+       ▼
+ Choice: 4 (Choose Scheduler)
+       │
+       ▼
+ Select: Priority Scheduler
+       │
+       ▼
+ Choice: 6 (Execute)
+       │
+       ▼
+ Check Dependencies ✓
+       │
+       ▼
+ Schedule: [Task 2, Task 1]
+       │
+       ▼
+ Execute:
+   Pass 1: Task 1 ✓
+   Pass 2: Task 2 ✓
+       │
+       ▼
+ Display Completion
+       │
+       ▼
+ Choice: 0
+       │
+       ▼
+      EXIT
+```
+
+---
+
+_These flowcharts illustrate the program's execution logic and demonstrate the use of recursion, polymorphism, and algorithmic thinking in the HTSE system._
+
+````
          │
          ▼
 ┌─────────────────────────┐
@@ -509,3 +943,4 @@ EXIT ───────────────┘
 
 **Note**: These are text-based flowcharts. For graphical flowcharts,
 export this logic to draw.io, Lucidchart, or similar tools.
+````
