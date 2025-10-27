@@ -109,27 +109,38 @@ void Task::markComplete()
 // OOP Concept: Abstraction - Display logic abstracted into method
 void Task::displayInfo(int indent) const
 {
-    string indentation(indent * 2, ' ');
+    string indentation(indent * 3, ' ');
     string statusStr;
+    string statusColor;
 
     switch (status)
     {
     case PENDING:
-        statusStr = "PENDING";
+        statusStr = "PENDING ";
+        statusColor = "\033[1;33m"; // Yellow
         break;
     case RUNNING:
-        statusStr = "RUNNING";
+        statusStr = "RUNNING ";
+        statusColor = "\033[1;34m"; // Blue
         break;
     case COMPLETED:
-        statusStr = "COMPLETED";
+        statusStr = "COMPLETE";
+        statusColor = "\033[1;32m"; // Green
         break;
     }
 
-    cout << indentation << "Task " << id << ": " << name
-         << " (priority=" << priority
-         << ", deadline=" << deadline
-         << ", status=" << statusStr
-         << ", time=" << estimated_time << ")" << endl;
+    // Tree structure symbols
+    string prefix = "";
+    if (indent == 0)
+        prefix = "[*] ";
+    else if (indent == 1)
+        prefix = " |-- ";
+    else
+        prefix = " |   +-- ";
+
+    cout << indentation << prefix << "Task " << id << ": " << name
+         << " [P=" << priority << ", D=" << deadline << "d, "
+         << statusColor << statusStr << "\033[0m" << "]" << endl;
 }
 
 // OOP Concept: Recursion - Displaying hierarchical structure recursively

@@ -14,13 +14,14 @@ TaskExecutor::TaskExecutor(ostream &out)
 // OOP Concept: Abstraction - Complex execution logic abstracted into single method
 void TaskExecutor::runTasks(const vector<Task *> &ordered_tasks, const string &scheduler_name)
 {
-    output << "========================================" << endl;
-    output << "STARTING TASK EXECUTION" << endl;
-    output << "========================================" << endl;
+    output << "\n\033[1;35m";
+    output << "+============================================+" << endl;
+    output << "|        TASK EXECUTION IN PROGRESS         |" << endl;
+    output << "+============================================+\033[0m" << endl;
     if (!scheduler_name.empty())
     {
-        output << "[Scheduler Used: " << scheduler_name << "]" << endl;
-        output << "----------------------------------------" << endl;
+        output << "\n  [Scheduler: \033[1;33m" << scheduler_name << "\033[0m]" << endl;
+        output << "  " << string(44, '-') << endl;
     }
 
     int executed_count = 0;
@@ -62,12 +63,12 @@ void TaskExecutor::runTasks(const vector<Task *> &ordered_tasks, const string &s
         // If no progress was made, we're stuck
         if (!progress_made && !remaining_tasks.empty())
         {
-            output << "----------------------------------------" << endl;
-            output << "WARNING: Cannot make further progress!" << endl;
-            output << "The following tasks are NOT READY:" << endl;
+            output << "\n  " << string(44, '-') << endl;
+            output << "  \033[1;31m[!] WARNING: Cannot make further progress!\033[0m" << endl;
+            output << "  The following tasks are NOT READY:" << endl;
             for (Task *task : remaining_tasks)
             {
-                output << "  Task " << task->getId() << ": " << task->getName()
+                output << "    - Task " << task->getId() << ": " << task->getName()
                        << " (waiting on dependencies)" << endl;
                 not_ready_count++;
             }
@@ -75,16 +76,17 @@ void TaskExecutor::runTasks(const vector<Task *> &ordered_tasks, const string &s
         }
     }
 
-    output << "========================================" << endl;
+    output << "\n+============================================+" << endl;
     if (not_ready_count == 0)
     {
-        output << "ALL TASKS COMPLETED SUCCESSFULLY" << endl;
+        output << "  \033[1;32m[SUCCESS] ALL TASKS COMPLETED!\033[0m" << endl;
     }
     else
     {
-        output << "EXECUTION COMPLETED WITH " << not_ready_count << " TASK(S) NOT READY" << endl;
+        output << "  \033[1;33m[WARNING] " << not_ready_count << " TASK(S) NOT READY\033[0m" << endl;
     }
-    output << "========================================" << endl;
+    output << "+============================================+\n"
+           << endl;
 }
 
 // OOP Concept: Recursion - Executes task and all its subtasks recursively
@@ -118,10 +120,24 @@ void TaskExecutor::executeTaskWithSubtasks(Task *task, int indent)
 void TaskExecutor::printTaskExecution(Task *task, int indent, const string &action)
 {
     string indentation(indent * 2, ' ');
-    output << indentation << action << ": Task " << task->getId()
-           << " : " << task->getName()
-           << " (priority=" << task->getPriority()
-           << ", deadline=" << task->getDeadline() << ")" << endl;
+    string actionColor;
+    string actionSymbol;
+
+    if (action == "RUNNING")
+    {
+        actionColor = "\033[1;34m"; // Blue
+        actionSymbol = "[~]";
+    }
+    else // COMPLETED
+    {
+        actionColor = "\033[1;32m"; // Green
+        actionSymbol = "[+]";
+    }
+
+    output << "  " << indentation << actionColor << actionSymbol << " " << action << "\033[0m: Task "
+           << task->getId() << " - " << task->getName()
+           << " (P=" << task->getPriority()
+           << ", D=" << task->getDeadline() << "d)" << endl;
     output.flush(); // Force output immediately
 }
 

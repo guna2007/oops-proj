@@ -23,9 +23,13 @@ void TaskManager::run()
 {
     int choice;
 
-    cout << "========================================" << endl;
-    cout << "HIERARCHICAL TASK SCHEDULING ENGINE" << endl;
-    cout << "========================================" << endl;
+    // Print branded header
+    cout << "\033[1;36m"; // Cyan bold
+    cout << "+============================================================+" << endl;
+    cout << "|     HIERARCHICAL TASK SCHEDULING ENGINE (HTSE)            |" << endl;
+    cout << "|                    [OOP Project Demo]                     |" << endl;
+    cout << "+============================================================+" << endl;
+    cout << "\033[0m"; // Reset color
     cout << endl;
 
     while (true)
@@ -77,19 +81,21 @@ void TaskManager::run()
 
 void TaskManager::displayMenu() const
 {
-    cout << "========================================" << endl;
-    cout << "MAIN MENU - HIERARCHICAL TASK SCHEDULING ENGINE" << endl;
-    cout << "========================================" << endl;
-    cout << "1. Add New Task" << endl;
-    cout << "2. Add Subtask to Existing Task" << endl;
-    cout << "3. Set Task Dependency" << endl;
-    cout << "4. Choose Scheduling Strategy" << endl;
-    cout << "5. Display Task Hierarchy" << endl;
-    cout << "6. Execute All Tasks" << endl;
-    cout << "7. View Execution Report" << endl;
-    cout << "0. Exit" << endl;
-    cout << "========================================" << endl;
-    cout << "Enter your choice: ";
+    cout << "\033[1;33m"; // Yellow bold
+    cout << "\n>>> MAIN MENU <<<\n";
+    cout << "\033[0m"; // Reset
+
+    cout << "+-----------------------------------------------+" << endl;
+    cout << "| [1] >> Add New Task                          |" << endl;
+    cout << "| [2] >> Add Subtask to Existing Task          |" << endl;
+    cout << "| [3] >> Set Task Dependency                   |" << endl;
+    cout << "| [4] >> Choose Scheduling Strategy            |" << endl;
+    cout << "| [5] >> Display Task Hierarchy                |" << endl;
+    cout << "| [6] >> Execute All Tasks                     |" << endl;
+    cout << "| [7] >> View Execution Report                 |" << endl;
+    cout << "| [0] >> Exit                                  |" << endl;
+    cout << "+-----------------------------------------------+" << endl;
+    cout << "\n\033[1;37mEnter your choice: \033[0m";
 }
 
 void TaskManager::addNewTask()
@@ -126,7 +132,8 @@ void TaskManager::addNewTask()
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
     Task *new_task = createTask(name, priority, deadline, time);
-    cout << "Task [" << name << "] added with ID " << new_task->getId() << endl;
+    cout << "\033[1;32m[+] Task created successfully!\033[0m ID: " << new_task->getId()
+         << " | Name: \"" << name << "\"" << endl;
 }
 
 void TaskManager::addSubtaskToTask()
@@ -171,7 +178,8 @@ void TaskManager::addSubtaskToTask()
     }
 
     addSubtask(parent_id, subtask_id);
-    cout << "Subtask " << subtask_id << " added under Parent " << parent_id << endl;
+    cout << "\033[1;32m[+] Subtask relationship created!\033[0m Parent: "
+         << parent_id << " --> Child: " << subtask_id << endl;
 }
 
 void TaskManager::setTaskDependency()
@@ -221,20 +229,21 @@ void TaskManager::setTaskDependency()
     if (hasCircularDependencies())
     {
         // Note: For simplicity, we'll just warn; in production, would rollback
-        cout << "WARNING: This dependency may create a cycle!" << endl;
+        cout << "\033[1;31m[!] WARNING: This dependency may create a cycle!\033[0m" << endl;
     }
 
-    cout << "Dependency added: Task " << task_id << " depends on " << dependency_id << endl;
+    cout << "\033[1;32m[+] Dependency added!\033[0m Task " << task_id
+         << " now depends on Task " << dependency_id << endl;
 }
 
 void TaskManager::chooseSchedulingStrategy()
 {
     int choice;
 
-    cout << "Select Scheduling Strategy:" << endl;
-    cout << "1. Priority Based" << endl;
-    cout << "2. Deadline Based" << endl;
-    cout << "3. Hierarchical" << endl;
+    cout << "\n\033[1;36m>> Select Scheduling Strategy:\033[0m" << endl;
+    cout << "  [1] Priority Based (highest priority first)" << endl;
+    cout << "  [2] Deadline Based (earliest deadline first)" << endl;
+    cout << "  [3] Hierarchical (parent tasks first)" << endl;
     cout << "Enter your choice: ";
 
     if (!(cin >> choice))
@@ -250,18 +259,18 @@ void TaskManager::chooseSchedulingStrategy()
     {
     case 1:
         setScheduler(make_unique<PriorityScheduler>());
-        cout << "PriorityScheduler selected" << endl;
+        cout << "\033[1;32m[+] PriorityScheduler activated!\033[0m" << endl;
         break;
     case 2:
         setScheduler(make_unique<DeadlineScheduler>());
-        cout << "DeadlineScheduler selected" << endl;
+        cout << "\033[1;32m[+] DeadlineScheduler activated!\033[0m" << endl;
         break;
     case 3:
         setScheduler(make_unique<HierarchicalScheduler>());
-        cout << "HierarchicalScheduler selected" << endl;
+        cout << "\033[1;32m[+] HierarchicalScheduler activated!\033[0m" << endl;
         break;
     default:
-        cout << "Invalid choice! Keeping current scheduler." << endl;
+        cout << "\033[1;31m[!] Invalid choice! Keeping current scheduler.\033[0m" << endl;
     }
 }
 
@@ -269,13 +278,16 @@ void TaskManager::displayTaskHierarchy() const
 {
     if (all_tasks.empty())
     {
-        cout << "No tasks to display!" << endl;
+        cout << "\033[1;31m[!] No tasks to display!\033[0m" << endl;
         return;
     }
 
-    cout << "========================================" << endl;
-    cout << "TASK HIERARCHY" << endl;
-    cout << "========================================" << endl;
+    cout << "\n\033[1;36m";
+    cout << "+============================================+" << endl;
+    cout << "|           TASK HIERARCHY VIEW              |" << endl;
+    cout << "+============================================+\033[0m" << endl;
+    cout << "\nLegend: [P=Priority, D=Deadline(days)]\n"
+         << endl;
 
     // Find root tasks (tasks that are not subtasks of others)
     set<int> subtask_ids;
@@ -296,7 +308,7 @@ void TaskManager::displayTaskHierarchy() const
         }
     }
 
-    cout << "========================================" << endl;
+    cout << "\n+============================================+" << endl;
 }
 
 void TaskManager::executeAllTasks()
@@ -326,9 +338,10 @@ void TaskManager::executeAllTasks()
 
 void TaskManager::printSummaryReport() const
 {
-    cout << "========================================" << endl;
-    cout << "EXECUTION REPORT" << endl;
-    cout << "========================================" << endl;
+    cout << "\n\033[1;32m";
+    cout << "+============================================+" << endl;
+    cout << "|          EXECUTION SUMMARY REPORT          |" << endl;
+    cout << "+============================================+\033[0m" << endl;
 
     int total_root_tasks = 0;
     int total_subtasks = 0;
@@ -360,13 +373,13 @@ void TaskManager::printSummaryReport() const
 
     int overall_tasks = all_tasks.size();
 
-    cout << "Total Root Tasks: " << total_root_tasks << endl;
-    cout << "Total Subtasks (nested): " << total_subtasks << endl;
-    cout << "Overall Tasks Executed: " << overall_tasks << endl;
-    cout << "Completed Successfully: " << completed << " / " << overall_tasks << endl;
-    cout << "Scheduler Used: " << last_scheduler_name << endl;
-    cout << "Simulated Execution Time: " << total_simulated_time << " units" << endl;
-    cout << "========================================" << endl;
+    cout << "\n  >> Total Root Tasks: " << total_root_tasks << endl;
+    cout << "  >> Total Subtasks (nested): " << total_subtasks << endl;
+    cout << "  >> Overall Tasks Executed: " << overall_tasks << endl;
+    cout << "  >> Completed Successfully: \033[1;32m" << completed << "\033[0m / " << overall_tasks << endl;
+    cout << "  >> Scheduler Used: \033[1;33m" << last_scheduler_name << "\033[0m" << endl;
+    cout << "  >> Simulated Execution Time: " << total_simulated_time << " units" << endl;
+    cout << "\n+============================================+" << endl;
 }
 
 // OOP Concept: Encapsulation - Task creation logic encapsulated
