@@ -96,8 +96,9 @@ bool Task::isReady() const
 void Task::execute()
 {
     status = RUNNING;
-    // Simulate realistic work with 500ms delay
-    Sleep(5000); // Windows API sleep function (milliseconds)
+    // Simulate work based on estimated time (1 second = 1 time unit for demo)
+    // Each task sleeps for estimated_time seconds
+    Sleep(estimated_time * 1000); // Convert time units to milliseconds
     status = COMPLETED;
 }
 

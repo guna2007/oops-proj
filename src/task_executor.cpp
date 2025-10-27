@@ -1,6 +1,7 @@
 #include "task_executor.h"
 #include <iostream>
 #include <iomanip>
+#include <windows.h>
 
 using namespace std;
 
@@ -110,12 +111,41 @@ void TaskExecutor::executeTaskWithSubtasks(Task *task, int indent)
         }
     }
 
-    // Execute the task itself
-    task->execute();
+    // Show progress animation and execute the task
+    showProgressAnimation(task, indent);
+
+    // Mark task as completed (animation already simulated the execution time)
+    task->markComplete();
     total_execution_time += task->getEstimatedTime();
 
     // Print COMPLETED status
     printTaskExecution(task, indent, "COMPLETED");
+}
+
+void TaskExecutor::showProgressAnimation(Task *task, int indent)
+{
+    string indentation(indent * 2, ' ');
+    int estimatedTime = task->getEstimatedTime();
+
+    // Show progress bar based on estimated time
+    output << "  " << indentation << "\033[0;36m    Progress: [";
+    output.flush();
+
+    int steps = estimatedTime; // 1 step per time unit
+    if (steps > 10)
+        steps = 10; // Max 10 steps for display
+
+    int delayPerStep = (estimatedTime * 1000) / steps; // milliseconds per step
+
+    for (int i = 0; i < steps; i++)
+    {
+        output << "=";
+        output.flush();
+        Sleep(delayPerStep);
+    }
+
+    output << "] 100%\033[0m" << endl;
+    output.flush();
 }
 
 void TaskExecutor::printTaskExecution(Task *task, int indent, const string &action)

@@ -20,6 +20,7 @@ private:
     // Helper methods
     void executeTaskWithSubtasks(Task *task, int indent = 0);
     void printTaskExecution(Task *task, int indent, const string &action);
+    void showProgressAnimation(Task *task, int indent);
 
 public:
     // Constructor takes output stream (default is cout)
