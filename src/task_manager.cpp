@@ -1,46 +1,77 @@
 #include "task_manager.h"
 #include "priority_scheduler.h"
+#ifndef D2_MODE
 #include "deadline_scheduler.h"
 #include "hierarchical_scheduler.h"
+#endif
 #include <iostream>
 #include <limits>
 #include <set>
 
 using namespace std;
 
-// OOP Concept: Encapsulation - All task management logic encapsulated in this class
-
-TaskManager::TaskManager()
-    : next_task_id(1), completed_tasks(0), total_simulated_time(0),
-      last_scheduler_name("None")
+// OOP Concept: Encapsulation
+TaskManager::TaskManager() : next_task_id(1), completed_tasks(0), total_simulated_time(0), last_scheduler_name("PriorityScheduler")
 {
-    // Default scheduler is PriorityScheduler
+#ifdef D2_MODE
+    priority_scheduler = new PriorityScheduler();
+#else
     current_scheduler = make_unique<PriorityScheduler>();
+#endif
 }
 
-// OOP Concept: Abstraction - Main interface hiding complex CLI logic
+void TaskManager::printHeader() const
+{
+    cout << COLOR_CYAN << UI_BORDER << "\n|     HIERARCHICAL TASK SCHEDULING ENGINE (HTSE)            |\n"
+         << "|                   OOP Project Demonstration               |\n"
+         << UI_BORDER << COLOR_RESET << endl;
+}
+
+void TaskManager::printMenu() const
+{
+    cout << COLOR_YELLOW << "\n>>> MAIN MENU <<<" << COLOR_RESET << "\n+--------------------------------------------------------------+\n"
+         << "| TASK MANAGEMENT                                              |\n| [1] Add New Task                                             |\n"
+         << "| [2] Add Subtask to Existing Task                             |\n| [3] Set Task Dependency                                      |\n";
+#ifndef D2_MODE
+    cout << "| [4] Choose Scheduling Strategy                               |\n";
+#endif
+    cout << "| [5] Display Task Hierarchy                                   |\n| [6] Execute All Tasks                                        |\n"
+         << "| [7] View Execution Report                                    |\n|                                                              |\n"
+         << "| OPERATOR OVERLOADING DEMOS                                   |\n| [8] Compare Tasks (>, <, ==, !=)                             |\n"
+         << "| [9] Modify Task Priority (+, -, ++, --)                      |\n| [10] Display Tasks with << Operator                          |\n";
+#ifndef D2_MODE
+    cout << "|                                                              |\n| TEMPLATE DEMONSTRATIONS                                      |\n"
+         << "| [11] Task Statistics (Template)                              |\n| [12] Generic Container Demo                                  |\n"
+         << "| [13] Generic Comparator Demo                                 |\n";
+#endif
+    cout << "|                                                              |\n| [0] Exit                                                     |\n"
+         << "+--------------------------------------------------------------+\nEnter your choice: ";
+}
+
+void TaskManager::printSection(const string &title) const { cout << "\n"
+                                                                 << COLOR_CYAN << "--- " << title << " ---" << COLOR_RESET << endl; }
+void TaskManager::printLine() const { cout << "+--------------------------------------------------------------+" << endl; }
+void TaskManager::printSuccess(const string &msg) const { cout << "\n"
+                                                               << COLOR_GREEN << "[SUCCESS] " << msg << COLOR_RESET << endl; }
+void TaskManager::printWarning(const string &msg) const { cout << "\n"
+                                                               << COLOR_YELLOW << "[WARNING] " << msg << COLOR_RESET << endl; }
+void TaskManager::printError(const string &msg) const { cout << "\n"
+                                                             << COLOR_RED << "[!] " << msg << COLOR_RESET << endl; }
+void TaskManager::displayMenu() const { printMenu(); }
+
+// OOP Concept: Abstraction
 void TaskManager::run()
 {
     int choice;
-
-    // Print branded header
-    cout << "\033[1;36m"; // Cyan bold
-    cout << "+============================================================+" << endl;
-    cout << "|     HIERARCHICAL TASK SCHEDULING ENGINE (HTSE)            |" << endl;
-    cout << "|                    [OOP Project Demo]                     |" << endl;
-    cout << "+============================================================+" << endl;
-    cout << "\033[0m"; // Reset color
-    cout << endl;
-
+    printHeader();
     while (true)
     {
         displayMenu();
-
         if (!(cin >> choice))
         {
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cout << "Invalid input! Please enter a number." << endl;
+            printError("Invalid input! Please enter a number.");
             continue;
         }
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
@@ -56,9 +87,11 @@ void TaskManager::run()
         case 3:
             setTaskDependency();
             break;
+#ifndef D2_MODE
         case 4:
             chooseSchedulingStrategy();
             break;
+#endif
         case 5:
             displayTaskHierarchy();
             break;
@@ -68,123 +101,107 @@ void TaskManager::run()
         case 7:
             printSummaryReport();
             break;
+        case 8:
+            compareTasksDemo();
+            break;
+        case 9:
+            modifyTaskPriorityDemo();
+            break;
+        case 10:
+            displayTasksWithOperator();
+            break;
+#ifndef D2_MODE
+        case 11:
+            statisticsDemo();
+            break;
+        case 12:
+            containerDemo();
+            break;
+        case 13:
+            comparatorDemo();
+            break;
+#endif
         case 0:
-            cout << "\n\033[1;36m";
-            cout << "+============================================================+" << endl;
-            cout << "|         Thank you for using HTSE! Goodbye!                |" << endl;
-            cout << "+============================================================+\033[0m" << endl;
+            cout << "\n"
+                 << COLOR_CYAN << UI_BORDER << "\n|         Thank you for using HTSE! Goodbye!                |\n"
+                 << UI_BORDER << COLOR_RESET << endl;
             return;
         default:
-            cout << "\033[1;31m[!] Invalid choice! Please try again.\033[0m" << endl;
+            printError("Invalid choice! Please try again.");
         }
-
         cout << endl;
     }
 }
 
-void TaskManager::displayMenu() const
+int TaskManager::getValidatedInt(const string &prompt, int min, int max)
 {
-    cout << "\033[1;33m"; // Yellow bold
-    cout << "\n>>> MAIN MENU <<<\n";
-    cout << "\033[0m"; // Reset
+    int value;
+    cout << prompt;
+    while (!(cin >> value) || value < min || value > max)
+    {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << COLOR_RED << "[!] Invalid! Enter " << min << "-" << max << ": " << COLOR_RESET;
+    }
+    return value;
+}
 
-    cout << "+-----------------------------------------------+" << endl;
-    cout << "| [1] >> Add New Task                          |" << endl;
-    cout << "| [2] >> Add Subtask to Existing Task          |" << endl;
-    cout << "| [3] >> Set Task Dependency                   |" << endl;
-    cout << "| [4] >> Choose Scheduling Strategy            |" << endl;
-    cout << "| [5] >> Display Task Hierarchy                |" << endl;
-    cout << "| [6] >> Execute All Tasks                     |" << endl;
-    cout << "| [7] >> View Execution Report                 |" << endl;
-    cout << "| [0] >> Exit                                  |" << endl;
-    cout << "+-----------------------------------------------+" << endl;
-    cout << "\n\033[1;37mEnter your choice: \033[0m";
+bool TaskManager::getTaskIds(int &id1, int &id2, const string &label1, const string &label2)
+{
+    cout << label1;
+    if (!(cin >> id1))
+    {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        return false;
+    }
+    cout << label2;
+    if (!(cin >> id2))
+    {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        return false;
+    }
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    return validateTaskId(id1) && validateTaskId(id2);
 }
 
 void TaskManager::addNewTask()
 {
     string name;
-    int priority, deadline, time;
-
-    cout << "\n\033[1;36m--- Add New Task ---\033[0m" << endl;
+    printSection("Add New Task");
     cout << "Task Name: ";
     getline(cin, name);
-
-    cout << "Priority (1-10, 10=highest): ";
-    while (!(cin >> priority) || priority < 1 || priority > 10)
-    {
-        cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        cout << "\033[1;31m[!] Invalid!\033[0m Enter 1-10: ";
-    }
-
-    cout << "Deadline (days from now): ";
-    while (!(cin >> deadline) || deadline < 0)
-    {
-        cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        cout << "\033[1;31m[!] Invalid!\033[0m Enter positive number: ";
-    }
-
-    cout << "Execution Time (units): ";
-    while (!(cin >> time) || time < 1)
-    {
-        cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        cout << "\033[1;31m[!] Invalid!\033[0m Enter positive number: ";
-    }
+    int priority = getValidatedInt("Priority (1-10, 10=highest): ", 1, 10);
+    int deadline = getValidatedInt("Deadline (days from now): ", 0, 9999);
+    int time = getValidatedInt("Execution Time (units): ", 1, 9999);
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
-
     Task *new_task = createTask(name, priority, deadline, time);
-    cout << "\n\033[1;32m[SUCCESS] Task created!\033[0m" << endl;
-    cout << "  ID: " << new_task->getId() << " | Name: \"" << name << "\"" << endl;
-    cout << "  Priority: " << priority << " | Deadline: " << deadline << "d | Time: " << time << "u" << endl;
+    printSuccess("Task created!");
+    cout << "  ID: " << new_task->getId() << " | Name: \"" << name << "\" | Priority: " << priority << " | Deadline: " << deadline << "d | Time: " << time << "u" << endl;
 }
 
 void TaskManager::addSubtaskToTask()
 {
     if (all_tasks.empty())
     {
-        cout << "\n\033[1;31m[!] No tasks available! Create tasks first.\033[0m" << endl;
+        printError("No tasks available! Create tasks first.");
         return;
     }
-
     int parent_id, subtask_id;
-
-    cout << "\n\033[1;36m--- Add Subtask Relationship ---\033[0m" << endl;
-    cout << "Parent Task ID: ";
-    if (!(cin >> parent_id))
+    printSection("Add Subtask Relationship");
+    if (!getTaskIds(parent_id, subtask_id, "Parent Task ID: ", "Child/Subtask ID: "))
     {
-        cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        cout << "\033[1;31m[!] Invalid input!\033[0m" << endl;
+        printError("Invalid input!");
         return;
     }
-
-    cout << "Child/Subtask ID: ";
-    if (!(cin >> subtask_id))
-    {
-        cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        cout << "\033[1;31m[!] Invalid input!\033[0m" << endl;
-        return;
-    }
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-
-    if (!validateTaskId(parent_id) || !validateTaskId(subtask_id))
-    {
-        cout << "\033[1;31m[!] Invalid task ID(s)!\033[0m" << endl;
-        return;
-    }
-
     if (parent_id == subtask_id)
     {
-        cout << "\033[1;31m[!] Error: A task cannot be its own subtask!\033[0m" << endl;
+        printError("A task cannot be its own subtask!");
         return;
     }
-
     addSubtask(parent_id, subtask_id);
-    cout << "\n\033[1;32m[SUCCESS] Subtask relationship created!\033[0m" << endl;
+    printSuccess("Subtask relationship created!");
     cout << "  Parent Task #" << parent_id << " --> Child Task #" << subtask_id << endl;
 }
 
@@ -192,131 +209,82 @@ void TaskManager::setTaskDependency()
 {
     if (all_tasks.empty())
     {
-        cout << "\n\033[1;31m[!] No tasks available! Create tasks first.\033[0m" << endl;
+        printError("No tasks available! Create tasks first.");
         return;
     }
-
     int task_id, dependency_id;
-
-    cout << "\n\033[1;36m--- Set Task Dependency ---\033[0m" << endl;
-    cout << "Task ID (will depend on another): ";
-    if (!(cin >> task_id))
+    printSection("Set Task Dependency");
+    if (!getTaskIds(task_id, dependency_id, "Task ID (will depend on another): ", "Dependency Task ID (must complete first): "))
     {
-        cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        cout << "\033[1;31m[!] Invalid input!\033[0m" << endl;
+        printError("Invalid input!");
         return;
     }
-
-    cout << "Dependency Task ID (must complete first): ";
-    if (!(cin >> dependency_id))
-    {
-        cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        cout << "\033[1;31m[!] Invalid input!\033[0m" << endl;
-        return;
-    }
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-
-    if (!validateTaskId(task_id) || !validateTaskId(dependency_id))
-    {
-        cout << "\033[1;31m[!] Invalid task ID(s)!\033[0m" << endl;
-        return;
-    }
-
     if (task_id == dependency_id)
     {
-        cout << "\033[1;31m[!] Error: A task cannot depend on itself!\033[0m" << endl;
+        printError("A task cannot depend on itself!");
         return;
     }
-
     addDependency(task_id, dependency_id);
-
-    // Check for circular dependencies
     if (hasCircularDependencies())
-    {
-        // Note: For simplicity, we'll just warn; in production, would rollback
-        cout << "\n\033[1;33m[WARNING] This dependency may create a cycle!\033[0m" << endl;
-    }
-
-    cout << "\n\033[1;32m[SUCCESS] Dependency added!\033[0m" << endl;
+        printWarning("This dependency may create a cycle!");
+    printSuccess("Dependency added!");
     cout << "  Task #" << task_id << " now depends on Task #" << dependency_id << endl;
 }
 
+#ifndef D2_MODE
 void TaskManager::chooseSchedulingStrategy()
 {
+    cout << "\n"
+         << COLOR_CYAN << "+--------------------------------------------------------------+\n|              SELECT SCHEDULING STRATEGY                      |\n"
+         << "+--------------------------------------------------------------+" << COLOR_RESET << "\n  [1] Priority Based (highest priority first)\n"
+         << "  [2] Deadline Based (earliest deadline first)\n  [3] Hierarchical (parent tasks first)\n\nYour choice: ";
     int choice;
-
-    cout << "\n\033[1;36m+-------------------------------------------+" << endl;
-    cout << "|      SELECT SCHEDULING STRATEGY           |" << endl;
-    cout << "+-------------------------------------------+\033[0m" << endl;
-    cout << "  [1] Priority Based (highest priority first)" << endl;
-    cout << "  [2] Deadline Based (earliest deadline first)" << endl;
-    cout << "  [3] Hierarchical (parent tasks first)" << endl;
-    cout << "\nYour choice: ";
-
     if (!(cin >> choice))
     {
         cin.clear();
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        cout << "\033[1;31m[!] Invalid input!\033[0m" << endl;
+        printError("Invalid input!");
         return;
     }
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
-
     switch (choice)
     {
     case 1:
         setScheduler(make_unique<PriorityScheduler>());
-        cout << "\n\033[1;32m[SUCCESS] PriorityScheduler activated!\033[0m" << endl;
+        printSuccess("PriorityScheduler activated!");
         break;
     case 2:
         setScheduler(make_unique<DeadlineScheduler>());
-        cout << "\n\033[1;32m[SUCCESS] DeadlineScheduler activated!\033[0m" << endl;
+        printSuccess("DeadlineScheduler activated!");
         break;
     case 3:
         setScheduler(make_unique<HierarchicalScheduler>());
-        cout << "\n\033[1;32m[SUCCESS] HierarchicalScheduler activated!\033[0m" << endl;
+        printSuccess("HierarchicalScheduler activated!");
         break;
     default:
-        cout << "\n\033[1;31m[!] Invalid choice! Keeping current scheduler.\033[0m" << endl;
+        printError("Invalid choice! Keeping current scheduler.");
     }
 }
+#endif
 
 void TaskManager::displayTaskHierarchy() const
 {
     if (all_tasks.empty())
     {
-        cout << "\033[1;31m[!] No tasks to display!\033[0m" << endl;
+        printError("No tasks to display!");
         return;
     }
-
-    cout << "\n\033[1;36m";
-    cout << "+============================================+" << endl;
-    cout << "|           TASK HIERARCHY VIEW              |" << endl;
-    cout << "+============================================+\033[0m" << endl;
-    cout << "\nLegend: [P=Priority, D=Deadline(days)]\n"
+    cout << "\n"
+         << COLOR_CYAN << "+============================================+\n|           TASK HIERARCHY VIEW              |\n"
+         << "+============================================+" << COLOR_RESET << "\n\nLegend: [P=Priority, D=Deadline(days)]\n"
          << endl;
-
-    // Find root tasks (tasks that are not subtasks of others)
     set<int> subtask_ids;
     for (const auto &task_ptr : all_tasks)
-    {
         for (const Task *subtask : task_ptr->getSubtasks())
-        {
             subtask_ids.insert(subtask->getId());
-        }
-    }
-
-    // Display hierarchy starting from root tasks
     for (const auto &task_ptr : all_tasks)
-    {
         if (subtask_ids.find(task_ptr->getId()) == subtask_ids.end())
-        {
             task_ptr->displayHierarchy(0);
-        }
-    }
-
     cout << "\n+============================================+" << endl;
 }
 
@@ -324,78 +292,54 @@ void TaskManager::executeAllTasks()
 {
     if (all_tasks.empty())
     {
-        cout << "\n\033[1;31m[!] No tasks to execute!\033[0m" << endl;
+        printError("No tasks to execute!");
         return;
     }
-
+#ifdef D2_MODE
+    if (!priority_scheduler)
+        priority_scheduler = new PriorityScheduler();
+#else
     if (!current_scheduler)
     {
-        cout << "\n\033[1;33m[INFO] No scheduler selected. Using default PriorityScheduler.\033[0m" << endl;
+        printWarning("No scheduler selected. Using default PriorityScheduler.");
         current_scheduler = make_unique<PriorityScheduler>();
     }
-
-    // Check for circular dependencies before execution
+#endif
     if (hasCircularDependencies())
     {
-        cout << "\n\033[1;31m";
-        cout << "+============================================+" << endl;
-        cout << "|               ERROR DETECTED               |" << endl;
-        cout << "+============================================+\033[0m" << endl;
-        cout << "  Circular dependencies found!" << endl;
-        cout << "  Please review and fix task dependencies." << endl;
+        cout << "\n"
+             << COLOR_RED << "+============================================+\n|               ERROR DETECTED               |\n"
+             << "+============================================+" << COLOR_RESET << "\n  Circular dependencies found!\n  Please review and fix task dependencies." << endl;
         return;
     }
-
     executeAll();
 }
 
 void TaskManager::printSummaryReport() const
 {
-    cout << "\n\033[1;32m";
-    cout << "+============================================+" << endl;
-    cout << "|          EXECUTION SUMMARY REPORT          |" << endl;
-    cout << "+============================================+\033[0m" << endl;
-
-    int total_root_tasks = 0;
-    int total_subtasks = 0;
-    int completed = 0;
-
-    // Find root tasks (not subtasks of any other task)
+    cout << "\n"
+         << COLOR_GREEN << "+============================================+\n|          EXECUTION SUMMARY REPORT          |\n"
+         << "+============================================+" << COLOR_RESET << endl;
+    int total_root_tasks = 0, total_subtasks = 0, completed = 0;
     set<int> subtask_ids;
     for (const auto &task_ptr : all_tasks)
-    {
         for (const Task *subtask : task_ptr->getSubtasks())
-        {
             subtask_ids.insert(subtask->getId());
-        }
-    }
-
     for (const auto &task_ptr : all_tasks)
     {
         total_subtasks += task_ptr->getTotalSubtasks();
         if (task_ptr->getStatus() == COMPLETED)
-        {
             completed++;
-        }
-        // Count root tasks
         if (subtask_ids.find(task_ptr->getId()) == subtask_ids.end())
-        {
             total_root_tasks++;
-        }
     }
-
     int overall_tasks = all_tasks.size();
-
-    cout << "\n  >> Total Root Tasks: " << total_root_tasks << endl;
-    cout << "  >> Total Subtasks (nested): " << total_subtasks << endl;
-    cout << "  >> Overall Tasks Executed: " << overall_tasks << endl;
-    cout << "  >> Completed Successfully: \033[1;32m" << completed << "\033[0m / " << overall_tasks << endl;
-    cout << "  >> Scheduler Used: \033[1;33m" << last_scheduler_name << "\033[0m" << endl;
-    cout << "  >> Simulated Execution Time: " << total_simulated_time << " units" << endl;
-    cout << "\n+============================================+" << endl;
+    cout << "\n  >> Total Root Tasks: " << total_root_tasks << "\n  >> Total Subtasks (nested): " << total_subtasks
+         << "\n  >> Overall Tasks Executed: " << overall_tasks << "\n  >> Completed Successfully: " << COLOR_GREEN << completed << COLOR_RESET << " / " << overall_tasks
+         << "\n  >> Scheduler Used: " << COLOR_YELLOW << last_scheduler_name << COLOR_RESET << "\n  >> Simulated Execution Time: " << total_simulated_time << " units\n"
+         << "\n+============================================+" << endl;
 }
 
-// OOP Concept: Encapsulation - Task creation logic encapsulated
 Task *TaskManager::createTask(const string &name, int priority, int deadline, int time)
 {
     auto task = make_unique<Task>(next_task_id, name, priority, deadline, time);
@@ -408,136 +352,275 @@ Task *TaskManager::createTask(const string &name, int priority, int deadline, in
 
 void TaskManager::addSubtask(int parent_id, int subtask_id)
 {
-    Task *parent = findTaskById(parent_id);
-    Task *subtask = findTaskById(subtask_id);
-
+    Task *parent = findTaskById(parent_id), *subtask = findTaskById(subtask_id);
     if (parent && subtask)
-    {
         parent->addSubtask(subtask);
-    }
 }
 
 void TaskManager::addDependency(int task_id, int dependency_id)
 {
-    Task *task = findTaskById(task_id);
-    Task *dependency = findTaskById(dependency_id);
-
+    Task *task = findTaskById(task_id), *dependency = findTaskById(dependency_id);
     if (task && dependency)
-    {
         task->addDependency(dependency);
-    }
 }
 
-// OOP Concept: Polymorphism - Accepts any Scheduler subclass
-void TaskManager::setScheduler(unique_ptr<Scheduler> sched)
-{
-    current_scheduler = move(sched);
-}
+#ifndef D2_MODE
+void TaskManager::setScheduler(unique_ptr<Scheduler> sched) { current_scheduler = move(sched); }
+#endif
 
 void TaskManager::executeAll()
 {
-    if (!current_scheduler)
-    {
-        cout << "No scheduler set!" << endl;
-        return;
-    }
-
-    // Collect all tasks as raw pointers
     vector<Task *> task_ptrs;
     for (const auto &task_ptr : all_tasks)
-    {
         task_ptrs.push_back(task_ptr.get());
-    }
-
-    // OOP Concept: Polymorphism - schedule() calls the appropriate scheduler implementation
+#ifdef D2_MODE
+    vector<Task *> scheduled_tasks = priority_scheduler->schedule(task_ptrs);
+    last_scheduler_name = priority_scheduler->getName();
+#else
     vector<Task *> scheduled_tasks = current_scheduler->schedule(task_ptrs);
-
-    // Store scheduler name for report
     last_scheduler_name = current_scheduler->getName();
-
-    // Reset executor
+#endif
     executor.resetExecutionTime();
-
-    // Execute tasks with scheduler name displayed
     executor.runTasks(scheduled_tasks, last_scheduler_name);
-
-    // Update statistics
     total_simulated_time = executor.getTotalExecutionTime();
     completed_tasks = 0;
     for (const auto &task_ptr : all_tasks)
-    {
         if (task_ptr->getStatus() == COMPLETED)
-        {
             completed_tasks++;
-        }
-    }
 }
 
 Task *TaskManager::findTaskById(int id) const
 {
     auto it = task_map.find(id);
-    if (it != task_map.end())
-    {
-        return it->second;
-    }
-    return nullptr;
+    return (it != task_map.end()) ? it->second : nullptr;
 }
 
-bool TaskManager::validateTaskId(int id) const
-{
-    return task_map.find(id) != task_map.end();
-}
+bool TaskManager::validateTaskId(int id) const { return task_map.find(id) != task_map.end(); }
 
-// OOP Concept: Recursion - Cycle detection using DFS
 bool TaskManager::detectCycle(Task *start, set<int> &visited, set<int> &rec_stack) const
 {
-    if (start == nullptr)
-    {
+    if (!start)
         return false;
-    }
-
     int id = start->getId();
-
     if (rec_stack.find(id) != rec_stack.end())
-    {
-        // Found a cycle
         return true;
-    }
-
     if (visited.find(id) != visited.end())
-    {
-        // Already processed this node
         return false;
-    }
-
     visited.insert(id);
     rec_stack.insert(id);
-
-    // Check dependencies
     for (const Task *dep : start->getDependencies())
-    {
         if (detectCycle(const_cast<Task *>(dep), visited, rec_stack))
-        {
             return true;
-        }
-    }
-
     rec_stack.erase(id);
     return false;
 }
 
 bool TaskManager::hasCircularDependencies() const
 {
-    set<int> visited;
-    set<int> rec_stack;
-
+    set<int> visited, rec_stack;
     for (const auto &task_ptr : all_tasks)
-    {
         if (detectCycle(task_ptr.get(), visited, rec_stack))
-        {
             return true;
-        }
-    }
-
     return false;
 }
+
+// OOP Concept: Operator Overloading Demonstrations
+void TaskManager::compareTasksDemo()
+{
+    if (all_tasks.size() < 2)
+    {
+        printError("Need at least 2 tasks to compare!");
+        return;
+    }
+    cout << "\n"
+         << COLOR_CYAN << "+============================================+\n|    OPERATOR OVERLOADING: TASK COMPARISON   |\n"
+         << "+============================================+" << COLOR_RESET << endl;
+    int id1, id2;
+    cout << "\nEnter first task ID: ";
+    if (!(cin >> id1) || !validateTaskId(id1))
+    {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        printError("Invalid task ID!");
+        return;
+    }
+    cout << "Enter second task ID: ";
+    if (!(cin >> id2) || !validateTaskId(id2))
+    {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        printError("Invalid task ID!");
+        return;
+    }
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    Task *task1 = findTaskById(id1), *task2 = findTaskById(id2);
+    cout << "\n"
+         << COLOR_YELLOW << "--- Comparing Tasks ---" << COLOR_RESET << "\nTask 1: " << *task1 << "\nTask 2: " << *task2 << endl;
+    cout << "\n"
+         << COLOR_GREEN << "--- Comparison Results ---" << COLOR_RESET
+         << "\nTask " << id1 << " > Task " << id2 << " ? " << (*task1 > *task2 ? "TRUE" : "FALSE")
+         << "\nTask " << id1 << " < Task " << id2 << " ? " << (*task1 < *task2 ? "TRUE" : "FALSE")
+         << "\nTask " << id1 << " >= Task " << id2 << " ? " << (*task1 >= *task2 ? "TRUE" : "FALSE")
+         << "\nTask " << id1 << " <= Task " << id2 << " ? " << (*task1 <= *task2 ? "TRUE" : "FALSE")
+         << "\nTask " << id1 << " == Task " << id2 << " ? " << (*task1 == *task2 ? "TRUE" : "FALSE")
+         << "\nTask " << id1 << " != Task " << id2 << " ? " << (*task1 != *task2 ? "TRUE" : "FALSE")
+         << "\n\n+============================================+" << endl;
+}
+
+void TaskManager::modifyTaskPriorityDemo()
+{
+    if (all_tasks.empty())
+    {
+        printError("No tasks available!");
+        return;
+    }
+    cout << "\n"
+         << COLOR_CYAN << "+============================================+\n|  OPERATOR OVERLOADING: PRIORITY MODIFICATION|\n"
+         << "+============================================+" << COLOR_RESET << endl;
+    int id;
+    cout << "\nEnter task ID to modify: ";
+    if (!(cin >> id) || !validateTaskId(id))
+    {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        printError("Invalid task ID!");
+        return;
+    }
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    Task *task = findTaskById(id);
+    cout << "\nOriginal Task: " << *task << "\n\n"
+         << COLOR_YELLOW << "--- Demonstrating Arithmetic Operators ---" << COLOR_RESET
+         << "\n\n[1] Using += operator (increase by 2):";
+    *task += 2;
+    cout << "\n    Result: " << *task << "\n\n[2] Using -= operator (decrease by 1):";
+    *task -= 1;
+    cout << "\n    Result: " << *task << "\n\n[3] Using ++ operator (pre-increment):";
+    ++(*task);
+    cout << "\n    Result: " << *task << "\n\n[4] Using -- operator (pre-decrement):";
+    --(*task);
+    cout << "\n    Result: " << *task << "\n\n[5] Using + operator (task + 3) - creates new Task:";
+    Task newTask = *task + 3;
+    cout << "\n    Original: " << *task << "\n    New Task: " << newTask << "\n\n[6] Using - operator (task - 2) - creates new Task:";
+    Task anotherTask = *task - 2;
+    cout << "\n    Original: " << *task << "\n    New Task: " << anotherTask << endl;
+    printSuccess("Priority automatically clamped to [1-10]");
+    cout << "+============================================+" << endl;
+}
+
+void TaskManager::displayTasksWithOperator()
+{
+    if (all_tasks.empty())
+    {
+        printError("No tasks available!");
+        return;
+    }
+    cout << "\n"
+         << COLOR_CYAN << "+============================================+\n|  OPERATOR OVERLOADING: STREAM OUTPUT (<<)  |\n"
+         << "+============================================+" << COLOR_RESET << "\n\nAll tasks using << operator:\n"
+         << endl;
+    for (const auto &task_ptr : all_tasks)
+        cout << "  " << *task_ptr << endl;
+    cout << "\n+============================================+" << endl;
+}
+
+#ifndef D2_MODE
+// OOP Concept: Templates
+void TaskManager::statisticsDemo()
+{
+    if (all_tasks.empty())
+    {
+        printError("No tasks available!");
+        return;
+    }
+    cout << "\n"
+         << COLOR_CYAN << "+============================================+\n|      TEMPLATE: STATISTICS CALCULATOR       |\n"
+         << "+============================================+" << COLOR_RESET << endl;
+    vector<int> priorities, deadlines, times;
+    for (const auto &task_ptr : all_tasks)
+    {
+        priorities.push_back(task_ptr->getPriority());
+        deadlines.push_back(task_ptr->getDeadline());
+        times.push_back(task_ptr->getEstimatedTime());
+    }
+    cout << "\n"
+         << COLOR_YELLOW << "--- Priority Statistics ---" << COLOR_RESET
+         << "\n  Total Tasks: " << priorities.size() << "\n  Average Priority: " << Statistics<int>::average(priorities)
+         << "\n  Sum of Priorities: " << Statistics<int>::sum(priorities) << "\n  Median Priority: " << Statistics<int>::median(priorities)
+         << "\n  Priority Range: " << Statistics<int>::range(priorities) << "\n\n"
+         << COLOR_YELLOW << "--- Deadline Statistics ---" << COLOR_RESET
+         << "\n  Average Deadline: " << Statistics<int>::average(deadlines) << " days\n  Median Deadline: " << Statistics<int>::median(deadlines)
+         << " days\n  Deadline Range: " << Statistics<int>::range(deadlines) << " days\n\n"
+         << COLOR_YELLOW << "--- Execution Time Statistics ---" << COLOR_RESET
+         << "\n  Total Time: " << Statistics<int>::sum(times) << " units\n  Average Time: " << Statistics<int>::average(times)
+         << " units\n  Median Time: " << Statistics<int>::median(times) << " units\n\n+============================================+" << endl;
+}
+
+void TaskManager::containerDemo()
+{
+    cout << "\n"
+         << COLOR_CYAN << "+============================================+\n|      TEMPLATE: GENERIC CONTAINER           |\n"
+         << "+============================================+" << COLOR_RESET << "\n\n"
+         << COLOR_YELLOW << "--- Container<int> Demo ---" << COLOR_RESET << endl;
+    Container<int> intContainer;
+    intContainer.add(42);
+    intContainer.add(17);
+    intContainer.add(99);
+    intContainer.add(5);
+    intContainer.display();
+    cout << "\n"
+         << COLOR_YELLOW << "--- Container<string> Demo ---" << COLOR_RESET << endl;
+    Container<string> strContainer;
+    strContainer.add("Alpha");
+    strContainer.add("Beta");
+    strContainer.add("Gamma");
+    strContainer.display();
+    cout << "\n"
+         << COLOR_YELLOW << "--- Container<Pair<string, int>> Demo ---" << COLOR_RESET << endl;
+    Container<Pair<string, int>> pairContainer;
+    pairContainer.add(Pair<string, int>("Task Count", all_tasks.size()));
+    pairContainer.add(Pair<string, int>("Next ID", next_task_id));
+    pairContainer.add(Pair<string, int>("Completed", completed_tasks));
+    pairContainer.display();
+    cout << "\n+============================================+" << endl;
+}
+
+void TaskManager::comparatorDemo()
+{
+    if (all_tasks.empty())
+    {
+        printError("No tasks available!");
+        return;
+    }
+    cout << "\n"
+         << COLOR_CYAN << "+============================================+\n|      TEMPLATE: GENERIC COMPARATOR          |\n"
+         << "+============================================+" << COLOR_RESET << endl;
+    vector<Task *> taskPtrs;
+    for (const auto &task_ptr : all_tasks)
+        taskPtrs.push_back(task_ptr.get());
+    cout << "\n"
+         << COLOR_YELLOW << "--- Finding Max/Min Priority Tasks ---" << COLOR_RESET << endl;
+    Task *maxTask = Comparator<Task *>::findMax(taskPtrs), *minTask = Comparator<Task *>::findMin(taskPtrs);
+    cout << "  Highest Priority Task: " << *maxTask << "\n  Lowest Priority Task:  " << *minTask << endl;
+    vector<int> priorities;
+    for (const auto &task_ptr : all_tasks)
+        priorities.push_back(task_ptr->getPriority());
+    cout << "\n"
+         << COLOR_YELLOW << "--- Sorting Priorities ---" << COLOR_RESET << "\n  Original: ";
+    for (int p : priorities)
+        cout << p << " ";
+    cout << "\n  Ascending: ";
+    vector<int> sorted_asc = Comparator<int>::sortAscending(priorities);
+    for (int p : sorted_asc)
+        cout << p << " ";
+    cout << "\n  Descending: ";
+    vector<int> sorted_desc = Comparator<int>::sortDescending(priorities);
+    for (int p : sorted_desc)
+        cout << p << " ";
+    cout << "\n\n"
+         << COLOR_YELLOW << "--- Priority Threshold Counts ---" << COLOR_RESET << endl;
+    int threshold = 5;
+    int high = Comparator<int>::countGreaterThan(priorities, threshold), low = Comparator<int>::countLessThan(priorities, threshold);
+    cout << "  Tasks with priority > " << threshold << ": " << high << "\n  Tasks with priority < " << threshold << ": " << low
+         << "\n\n+============================================+" << endl;
+}
+#endif

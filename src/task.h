@@ -61,6 +61,34 @@ public:
 
     // Utility methods
     int getTotalSubtasks() const; // Counts all subtasks recursively
+
+    // ===== OOP Concept: OPERATOR OVERLOADING =====
+
+    // Comparison operators - Compare tasks by priority
+    bool operator<(const Task &other) const;  // Lower priority
+    bool operator>(const Task &other) const;  // Higher priority
+    bool operator<=(const Task &other) const; // Lower or equal priority
+    bool operator>=(const Task &other) const; // Higher or equal priority
+    bool operator==(const Task &other) const; // Same task (by ID)
+    bool operator!=(const Task &other) const; // Different task
+
+    // Arithmetic operators - Modify priority
+    Task operator+(int value) const; // Increase priority
+    Task operator-(int value) const; // Decrease priority
+    Task &operator+=(int value);     // Increase priority in-place
+    Task &operator-=(int value);     // Decrease priority in-place
+
+    // Increment/Decrement operators - Adjust priority by 1
+    Task &operator++();   // Pre-increment priority
+    Task operator++(int); // Post-increment priority
+    Task &operator--();   // Pre-decrement priority
+    Task operator--(int); // Post-decrement priority
+
+    // Stream insertion operator - For easy printing
+    friend ostream &operator<<(ostream &os, const Task &task);
+
+    // Assignment operator
+    Task &operator=(const Task &other);
 };
 
 #endif // TASK_H

@@ -1,9 +1,0 @@
-cd /c/Users/lanka/OneDrive/Desktop/OOPs-Proj && g++ -std=c++17 -Wall -Wextra -O2 src/*.cpp -o htse
-
-./htse
-
-# Quick Demo Test (3 tasks with different execution times: 2s, 4s, 6s)
-printf "1\nQuick Task\n5\n3\n2\n1\nMedium Task\n7\n5\n4\n1\nLong Task\n9\n7\n6\n6\n0\n" | ./htse
-
-# Full Feature Test
-printf "1\nProject Planning\n8\n5\n3\n1\nFrontend Design\n7\n10\n2\n1\nBackend API\n9\n7\n4\n1\nTesting Phase\n5\n15\n2\n2\n1\n2\n2\n1\n3\n3\n4\n3\n5\n4\n1\n6\n7\n4\n2\n6\n4\n3\n6\n7\n0\n" | ./htse

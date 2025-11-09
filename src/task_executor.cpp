@@ -1,38 +1,38 @@
 #include "task_executor.h"
+#include "config.h"
 #include <iostream>
 #include <iomanip>
 #include <windows.h>
 
 using namespace std;
 
-// OOP Concept: Composition - TaskExecutor coordinates execution of Task objects
-
+// Constructor
 TaskExecutor::TaskExecutor(ostream &out)
     : output(out), total_execution_time(0)
 {
 }
 
-// OOP Concept: Abstraction - Complex execution logic abstracted into single method
+// Main execution method - Run all tasks in order
 void TaskExecutor::runTasks(const vector<Task *> &ordered_tasks, const string &scheduler_name)
 {
-    output << "\n\033[1;35m";
+    // Print header
+    output << "\n" << COLOR_MAGENTA;
     output << "+============================================+" << endl;
     output << "|        TASK EXECUTION IN PROGRESS         |" << endl;
-    output << "+============================================+\033[0m" << endl;
+    output << "+============================================+" << COLOR_RESET << endl;
+    
     if (!scheduler_name.empty())
     {
-        output << "  Scheduler: \033[1;33m" << scheduler_name << "\033[0m" << endl;
-        output << "  " << string(44, '-') << endl
-               << endl;
+        output << "  Scheduler: " << COLOR_YELLOW << scheduler_name << COLOR_RESET << endl;
+        output << "  " << string(44, '-') << endl << endl;
     }
 
     int executed_count = 0;
     int not_ready_count = 0;
-    const int MAX_PASSES = 10; // Prevent infinite loops
-
-    // Create a working list of tasks to execute
+    const int MAX_PASSES = 10;  // Prevent infinite loops
     vector<Task *> remaining_tasks = ordered_tasks;
 
+    // Execute tasks in multiple passes to handle dependencies
     for (int pass = 0; pass < MAX_PASSES && !remaining_tasks.empty(); ++pass)
     {
         vector<Task *> deferred_tasks;
@@ -40,34 +40,33 @@ void TaskExecutor::runTasks(const vector<Task *> &ordered_tasks, const string &s
 
         for (Task *task : remaining_tasks)
         {
-            // Skip already completed tasks
+            // Skip completed tasks
             if (task->getStatus() == COMPLETED)
-            {
                 continue;
-            }
 
-            // Check if task is ready (all dependencies completed)
+            // Defer tasks with unmet dependencies
             if (!task->isReady())
             {
                 deferred_tasks.push_back(task);
                 continue;
             }
 
-            // Execute the task
+            // Execute ready task
             executeTaskWithSubtasks(task, 0);
             executed_count++;
             progress_made = true;
         }
 
-        // Update remaining tasks
         remaining_tasks = deferred_tasks;
 
-        // If no progress was made, we're stuck
+        // Check for deadlock (no progress possible)
         if (!progress_made && !remaining_tasks.empty())
         {
             output << "\n  " << string(44, '-') << endl;
-            output << "  \033[1;31m[!] WARNING: Cannot make further progress!\033[0m" << endl;
+            output << "  " << COLOR_RED << "[!] WARNING: Cannot make further progress!" 
+                   << COLOR_RESET << endl;
             output << "  The following tasks are NOT READY:" << endl;
+            
             for (Task *task : remaining_tasks)
             {
                 output << "    - Task " << task->getId() << ": " << task->getName()
@@ -78,64 +77,54 @@ void TaskExecutor::runTasks(const vector<Task *> &ordered_tasks, const string &s
         }
     }
 
+    // Print summary
     output << "\n+============================================+" << endl;
     if (not_ready_count == 0)
-    {
-        output << "  \033[1;32m[SUCCESS] ALL TASKS COMPLETED!\033[0m" << endl;
-    }
+        output << "  " << COLOR_GREEN << "[SUCCESS] ALL TASKS COMPLETED!" << COLOR_RESET << endl;
     else
-    {
-        output << "  \033[1;33m[WARNING] " << not_ready_count << " TASK(S) NOT READY\033[0m" << endl;
-    }
-    output << "+============================================+\n"
-           << endl;
+        output << "  " << COLOR_YELLOW << "[WARNING] " << not_ready_count 
+               << " TASK(S) NOT READY" << COLOR_RESET << endl;
+    output << "+============================================+\n" << endl;
 }
 
-// OOP Concept: Recursion - Executes task and all its subtasks recursively
+// Execute task and all subtasks recursively
 void TaskExecutor::executeTaskWithSubtasks(Task *task, int indent)
 {
     if (task == nullptr || task->getStatus() == COMPLETED)
-    {
         return;
-    }
 
-    // Print RUNNING status
+    // Print starting status
     printTaskExecution(task, indent, "RUNNING");
 
-    // Execute subtasks first (depth-first execution)
+    // Execute subtasks first (depth-first)
     for (Task *subtask : task->getSubtasks())
     {
         if (subtask->getStatus() != COMPLETED && subtask->isReady())
-        {
             executeTaskWithSubtasks(subtask, indent + 1);
-        }
     }
 
-    // Show progress animation and execute the task
+    // Show progress animation
     showProgressAnimation(task, indent);
 
-    // Mark task as completed (animation already simulated the execution time)
+    // Mark complete and update time
     task->markComplete();
     total_execution_time += task->getEstimatedTime();
 
-    // Print COMPLETED status
+    // Print completion status
     printTaskExecution(task, indent, "COMPLETED");
 }
 
+// Display progress bar animation
 void TaskExecutor::showProgressAnimation(Task *task, int indent)
 {
     string indentation(indent * 2, ' ');
     int estimatedTime = task->getEstimatedTime();
 
-    // Show progress bar based on estimated time
-    output << "  " << indentation << "\033[0;36m    Progress: [";
+    output << "  " << indentation << COLOR_CYAN << "    Progress: [";
     output.flush();
 
-    int steps = estimatedTime; // 1 step per time unit
-    if (steps > 10)
-        steps = 10; // Max 10 steps for display
-
-    int delayPerStep = (estimatedTime * 1000) / steps; // milliseconds per step
+    int steps = (estimatedTime > 10) ? 10 : estimatedTime;
+    int delayPerStep = (estimatedTime * EXEC_DELAY_MS) / steps;
 
     for (int i = 0; i < steps; i++)
     {
@@ -144,39 +133,31 @@ void TaskExecutor::showProgressAnimation(Task *task, int indent)
         Sleep(delayPerStep);
     }
 
-    output << "] 100%\033[0m" << endl;
+    output << "] 100%" << COLOR_RESET << endl;
     output.flush();
 }
 
+// Print task execution status with formatting
 void TaskExecutor::printTaskExecution(Task *task, int indent, const string &action)
 {
     string indentation(indent * 2, ' ');
-    string actionColor;
-    string actionSymbol;
+    string actionColor = (action == "RUNNING") ? COLOR_BLUE : COLOR_GREEN;
+    string actionSymbol = (action == "RUNNING") ? "[~]" : "[+]";
 
-    if (action == "RUNNING")
-    {
-        actionColor = "\033[1;34m"; // Blue
-        actionSymbol = "[~]";
-    }
-    else // COMPLETED
-    {
-        actionColor = "\033[1;32m"; // Green
-        actionSymbol = "[+]";
-    }
-
-    output << "  " << indentation << actionColor << actionSymbol << " " << action << "\033[0m: Task "
-           << task->getId() << " - " << task->getName()
-           << " (P=" << task->getPriority()
+    output << "  " << indentation << actionColor << actionSymbol << " " 
+           << action << COLOR_RESET << ": Task" << task->getId() << " - " 
+           << task->getName() << " (P=" << task->getPriority()
            << ", D=" << task->getDeadline() << "d)" << endl;
-    output.flush(); // Force output immediately
+    output.flush();
 }
 
+// Get total execution time
 int TaskExecutor::getTotalExecutionTime() const
 {
     return total_execution_time;
 }
 
+// Reset execution time counter
 void TaskExecutor::resetExecutionTime()
 {
     total_execution_time = 0;

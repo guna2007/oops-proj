@@ -3,16 +3,10 @@
 
 using namespace std;
 
-// OOP Concept: Abstraction - Main function uses high-level TaskManager interface
-// All complexity is hidden behind the TaskManager class
-
+// Main entry point
 int main()
 {
-    // OOP Concept: Encapsulation - TaskManager encapsulates all system logic
     TaskManager manager;
-
-    // OOP Concept: Abstraction - Simple interface hides complex CLI implementation
     manager.run();
-
     return 0;
 }
